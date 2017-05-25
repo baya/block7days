@@ -13,14 +13,16 @@ void tx_fread(fread_arg *arg);
 int main()
 {
     unsigned int tx_v;
+    unsigned char tx_vin;
     FILE *fp;
-    fread_arg tx_arg;
+    fread_arg tx_arg, tx_arg1;
 
     fp = fopen("tx0.bin", "rb");
     tx_arg.buffer = &tx_v;
     tx_arg.size = sizeof(tx_v);
     tx_arg.count = 1;
     tx_arg.stream = fp;
+
 
     
     // size_t ret_code = fread(&tx_v, sizeof(tx_v), 1, fp);
@@ -36,9 +38,19 @@ int main()
     /* } */
 
     tx_fread(&tx_arg);
+    
     printf("Tx Version: %u\n", tx_v);
 
-    fclose(tx_arg.stream);
+    tx_arg1.buffer = &tx_vin;
+    tx_arg1.size = sizeof(tx_vin);
+    tx_arg1.count = 1;
+    tx_arg1.stream = fp;
+
+    tx_fread(&tx_arg1);
+    printf("Tx Inputs: %u\n", tx_vin);
+
+
+    fclose(fp);
 }
 
 void tx_fread(fread_arg *arg)
