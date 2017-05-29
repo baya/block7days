@@ -24,6 +24,9 @@ int main()
     tx_arg.stream = fp;
 
 
+    printf("0xfd: %i\n", 0xfd);
+    printf("0xfe: %i\n", 0xfe);
+    printf("0xff: %i\n", 0xff);
     
     // size_t ret_code = fread(&tx_v, sizeof(tx_v), 1, fp);
     /* printf("sizeof tx_v: %lu\n", sizeof(tx_v)); */
