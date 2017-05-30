@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdint.h>
 
-int main()
+
+ int main()
 {
   FILE *fp;
   unsigned int tx_version;
@@ -11,6 +12,9 @@ int main()
   uint32_t tx_vin4;
   uint64_t tx_vin8;
   uint64_t tx_vin;
+
+  char pre_tx_hash[32];
+  uint32_t pre_txout_inx;
 
   fp = fopen("tx0.bin", "rb");
   fread(&tx_version, sizeof(tx_version), 1, fp);
@@ -30,8 +34,13 @@ int main()
     tx_vin = 0;
   }
 
+  fread(pre_tx_hash, sizeof(*pre_tx_hash), 32, fp);
+  fread(&pre_txout_inx, sizeof(pre_txout_inx), 1, fp);
+
   printf("Tx Version: %u\n", tx_version);
   printf("Tx In-counter: %llu\n", tx_vin);
+  printf("Tx Previous Transaction hash: %x\n", pre_tx_hash[0]);
+  printf("Tx Previous Txout-index: %x\n", pre_txout_inx);
   
 }
 
