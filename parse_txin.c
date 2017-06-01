@@ -1,23 +1,59 @@
 #include <stdio.h>
 #include <stdint.h>
 
+uint32_t btc_uint4(FILE *fp);
+void get_hex2_str(char *buf, const uint8_t b);
+uint64_t btc_varint(FILE *fp);
+void btc_hash(char *tx_hash_str, FILE *fp);
 
- int main()
+int main(int argc, char *argv[])
 {
   FILE *fp;
-  unsigned int tx_version;
+  uint32_t tx_version;
+  uint64_t tx_vin;
+  uint32_t pre_txout_inx;
+  char pre_tx_hash_str[65];
+  uint64_t txin_script_len;
 
+  fp = fopen(argv[1], "rb");
+  tx_version = btc_uint4(fp);
+  tx_vin = btc_varint(fp);
+  btc_hash(pre_tx_hash_str, fp);
+  pre_txout_inx = btc_uint4(fp);
+  txin_script_len = btc_varint(fp);
+
+  printf("Tx Version: %u\n", tx_version);
+  printf("Tx In-counter: %llu\n", tx_vin);
+  printf("Txin Previous Tx Hash: %s\n", pre_tx_hash_str);
+  printf("Txin Previous Txout-index: %x\n", pre_txout_inx);
+  printf("Txin-script length: %llu\n", txin_script_len);
+  
+
+  fclose(fp);
+  
+}
+
+void get_hex2_str(char *buf, const uint8_t b)
+{
+  snprintf(buf, 3, "%02x", b);
+}
+
+uint32_t btc_uint4(FILE *fp)
+{
+  uint32_t buf;
+  fread(&buf, sizeof(buf), 1, fp);
+
+  return buf;
+}
+
+uint64_t btc_varint(FILE *fp)
+{
   uint8_t  tx_vin1;
   uint16_t tx_vin2;
   uint32_t tx_vin4;
   uint64_t tx_vin8;
   uint64_t tx_vin;
 
-  char pre_tx_hash[32];
-  uint32_t pre_txout_inx;
-
-  fp = fopen("tx0.bin", "rb");
-  fread(&tx_version, sizeof(tx_version), 1, fp);
   fread(&tx_vin1, sizeof(tx_vin1), 1, fp);
   if(tx_vin1 < 0xFD){
     tx_vin = tx_vin1;
@@ -34,13 +70,23 @@
     tx_vin = 0;
   }
 
-  fread(pre_tx_hash, sizeof(*pre_tx_hash), 32, fp);
-  fread(&pre_txout_inx, sizeof(pre_txout_inx), 1, fp);
+  return tx_vin;
+}
 
-  printf("Tx Version: %u\n", tx_version);
-  printf("Tx In-counter: %llu\n", tx_vin);
-  printf("Tx Previous Transaction hash: %x\n", pre_tx_hash[0]);
-  printf("Tx Previous Txout-index: %x\n", pre_txout_inx);
-  
+void btc_hash(char *tx_hash_str, FILE *fp)
+{
+  uint8_t tx_hash[32];
+  char buf3[3];
+
+  size_t ret_code = fread(tx_hash, sizeof(uint8_t), 32, fp);
+  for(int i=31; i >=0; --i)
+  {
+    get_hex2_str(buf3, tx_hash[i]);
+    tx_hash_str[(31-i) *2] = buf3[0];
+    tx_hash_str[(31-i) *2 + 1] = buf3[1];
+    if(i == 0){
+      tx_hash_str[64] = '\0';
+    }
+  }
 }
 
