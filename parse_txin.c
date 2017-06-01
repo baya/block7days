@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   uint32_t pre_txout_inx;
   char pre_tx_hash_str[65];
   uint64_t txin_script_len;
-  char *txin_sg;
+  char *txin_sig;
   uint32_t txin_seqno;
 
   fp = fopen(argv[1], "rb");
@@ -25,8 +25,9 @@ int main(int argc, char *argv[])
   btc_hash(pre_tx_hash_str, fp);
   pre_txout_inx = btc_uint4(fp);
   txin_script_len = btc_varint(fp);
-  txin_sg = malloc(2*txin_script_len * sizeof(uint8_t) + 1);
-  btc_sig(txin_sg, txin_script_len, fp);
+  txin_sig = malloc(2*txin_script_len * sizeof(uint8_t) + 1);
+  //char txin_sig[txin_script_len];
+  btc_sig(txin_sig, txin_script_len, fp);
   txin_seqno = btc_uint4(fp);
 
   printf("Tx Version: %u\n", tx_version);
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
   printf("Txin Previous Tx Hash: %s\n", pre_tx_hash_str);
   printf("Txin Previous Txout-index: %x\n", pre_txout_inx);
   printf("Txin-script length: %llu\n", txin_script_len);
-  printf("Txin-script / scriptSig: %s\n", txin_sg);
+  printf("Txin-script / scriptSig: %s\n", txin_sig);
   printf("Txin sequence_no: %x\n", txin_seqno);
   
 
