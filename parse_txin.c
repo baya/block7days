@@ -26,7 +26,6 @@ int main(int argc, char *argv[])
   pre_txout_inx = btc_uint4(fp);
   txin_script_len = btc_varint(fp);
   txin_sig = malloc(2*txin_script_len * sizeof(uint8_t) + 1);
-  //char txin_sig[txin_script_len];
   btc_sig(txin_sig, txin_script_len, fp);
   txin_seqno = btc_uint4(fp);
 
