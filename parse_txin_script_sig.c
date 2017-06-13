@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define COINBASE_INX       0xffffffff
+#define NULL_HASH          "0000000000000000000000000000000000000000000000000000000000000000"
 
 #define OP_FALSE           0x00
 #define OP_PUSHDATA0_START 0x01
@@ -73,12 +75,12 @@ int main(int argc, char *argv[])
   btc_hash(pre_tx_hash_str, fp);
   pre_txout_inx = btc_uint4(fp);
   txin_script_len = btc_varint(fp);
-  if(pre_txout_inx == COINBASE_INX){
+  if(pre_txout_inx == COINBASE_INX && strcmp(pre_tx_hash_str, NULL_HASH) == 0){
     cb_sig.len = txin_script_len;
     btc_cb_sig(&cb_sig, fp);
   } else {
-    btc_sc_sig(&sc_sig, fp);
     sc_sig.len = txin_script_len;
+    btc_sc_sig(&sc_sig, fp);
   }
 
   txin_seqno = btc_uint4(fp);
