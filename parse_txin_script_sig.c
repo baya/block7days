@@ -28,11 +28,17 @@
 #define OP_15              0x5f
 #define OP_16              0x60
 
+#define SIG_BUF_SIZE       1000
+
+typedef struct coinbase_sig {
+  char sig[SIG_BUF_SIZE];
+  uint64_t len;
+} coinbase_sig;
 
 typedef struct script_sig {
-  char *sig;
-  char *pubkey;
-  //int i;
+  char sig[SIG_BUF_SIZE];
+  char pubkey[SIG_BUF_SIZE];
+  uint64_t len;
 } script_sig;
 
 
@@ -40,12 +46,10 @@ uint32_t btc_uint4(FILE *fp);
 void get_hex2_str(char *buf, const uint8_t b);
 uint64_t btc_varint(FILE *fp);
 void btc_hash(char *tx_hash_str, FILE *fp);
-void btc_sig(script_sig *sig_ptr, FILE *fp);
+void btc_sc_sig(script_sig *sig_ptr, FILE *fp);
 void cp_sig_hex_to_str(char *sig_str, const uint8_t sig_buf[], const uint64_t len);
 void read_op_pushdata0(char *str, uint8_t op_code, FILE *fp);
-void printf_btc_script_sig(script_sig *sc_sig);
-char *cp_sig_hex_to_str_2(const uint8_t sig_buf[], uint64_t len);
-char *read2_op_pushdata0(uint8_t op_code, FILE *fp);
+void btc_cb_sig(coinbase_sig *sig_ptr, FILE *fp);
 
 int main(int argc, char *argv[])
 {
@@ -58,6 +62,10 @@ int main(int argc, char *argv[])
   char *txin_sig;
   uint32_t txin_seqno;
   script_sig sc_sig;
+  coinbase_sig cb_sig;
+
+  sc_sig.len = 0;
+  cb_sig.len = 0;
   
   fp = fopen(argv[1], "rb");
   tx_version = btc_uint4(fp);
@@ -65,8 +73,14 @@ int main(int argc, char *argv[])
   btc_hash(pre_tx_hash_str, fp);
   pre_txout_inx = btc_uint4(fp);
   txin_script_len = btc_varint(fp);
+  if(pre_txout_inx == COINBASE_INX){
+    cb_sig.len = txin_script_len;
+    btc_cb_sig(&cb_sig, fp);
+  } else {
+    btc_sc_sig(&sc_sig, fp);
+    sc_sig.len = txin_script_len;
+  }
 
-  btc_sig(&sc_sig, fp);
   txin_seqno = btc_uint4(fp);
 
   printf("Tx Version: %u\n", tx_version);
@@ -74,7 +88,12 @@ int main(int argc, char *argv[])
   printf("Txin Previous Tx Hash: %s\n", pre_tx_hash_str);
   printf("Txin Previous Txout-index: %x\n", pre_txout_inx);
   printf("Txin-script length: %llu\n", txin_script_len);
-  printf_btc_script_sig(&sc_sig);
+  if(cb_sig.len > 0){
+    printf("Txin-script / coinbase: %s\n", cb_sig.sig);
+  }
+  if(sc_sig.len > 0){
+    printf("Txin-script / scriptSig: %s %s\n", sc_sig.sig, sc_sig.pubkey);
+  }
   printf("Txin sequence_no: %x\n", txin_seqno);
   
 
@@ -82,10 +101,6 @@ int main(int argc, char *argv[])
   
 }
 
-void printf_btc_script_sig(script_sig *sc_sig)
-{
-  printf("Txin-script / scriptSig: %s %s\n", sc_sig -> sig, sc_sig -> pubkey);
-}
 
 void get_hex2_str(char *buf, const uint8_t b)
 {
@@ -144,26 +159,43 @@ void btc_hash(char *tx_hash_str, FILE *fp)
   }
 }
 
-void btc_sig(script_sig *sig_ptr, FILE *fp)
+void btc_cb_sig(coinbase_sig *sig_ptr, FILE *fp)
+{
+  uint64_t len = sig_ptr -> len;
+  uint8_t sig_buf[len];
+  char buf3[3];
+  
+  fread(sig_buf, sizeof(uint8_t), len, fp);
+  for(uint64_t i=0; i < len; i++)
+  {
+    get_hex2_str(buf3, sig_buf[i]);
+    sig_ptr->sig[i * 2] = buf3[0];
+    sig_ptr->sig[i * 2 + 1] = buf3[1];
+  }
+
+  sig_ptr->sig[len * 2] = '\0';
+
+}
+
+void btc_sc_sig(script_sig *sig_ptr, FILE *fp)
 {
   uint8_t op_code;
   char buf3[3];
 
   fread(&op_code, sizeof(uint8_t), 1, fp);
   if(op_code >= OP_PUSHDATA0_START && op_code <= OP_PUSHDATA0_END){
-    // read_op_pushdata0(sig_ptr -> sig, op_code, fp);
-    sig_ptr -> sig = read2_op_pushdata0(op_code, fp);
+    read_op_pushdata0(sig_ptr -> sig, op_code, fp);
   } else {
   }
 
   fread(&op_code, sizeof(uint8_t), 1, fp);
   if(op_code >= OP_PUSHDATA0_START && op_code <= OP_PUSHDATA0_END){
-    // read_op_pushdata0(sig_ptr -> pubkey, op_code, fp);
-    sig_ptr -> pubkey = read2_op_pushdata0(op_code, fp);
+    read_op_pushdata0(sig_ptr -> pubkey, op_code, fp);
   } else {
   }
 
 }
+
 
 void read_op_pushdata0(char *str, uint8_t op_code, FILE *fp)
 {
@@ -176,53 +208,17 @@ void read_op_pushdata0(char *str, uint8_t op_code, FILE *fp)
   free(sig_buf);
 }
 
-char *read2_op_pushdata0(uint8_t op_code, FILE *fp)
-{
-  uint8_t *sig_buf;
-  char *str;
-  
-  sig_buf = malloc(op_code * sizeof(uint8_t));
-  fread(sig_buf, sizeof(uint8_t), op_code, fp);
-  str = cp_sig_hex_to_str_2(sig_buf, op_code);
-
-  free(sig_buf);
-
-  return str;
-}
 
 void cp_sig_hex_to_str(char *sig_str, const uint8_t sig_buf[], uint64_t len)
 {
   char buf3[3];
-  char *str_buf;
-  str_buf = malloc((len * 2 + 1) * sizeof(char) );
   for(int64_t i=0; i < len; i++)
   {
     get_hex2_str(buf3, sig_buf[i]);
-    str_buf[i * 2] = buf3[0];
-    str_buf[i * 2 + 1] = buf3[1];
-    printf("%c",str_buf[i*2]);
-    printf("%c", str_buf[i*2 + 1]);
+    sig_str[i * 2] = buf3[0];
+    sig_str[i * 2 + 1] = buf3[1];
   }
 
-  str_buf[len * 2] = '\0';
-  sig_str = str_buf;
+  sig_str[len * 2] = '\0';
 }
 
-char *cp_sig_hex_to_str_2(const uint8_t sig_buf[], uint64_t len)
-{
-  char buf3[3];
-  char *str_buf;
-  str_buf = malloc((len * 2 + 1) * sizeof(char) );
-  for(int64_t i=0; i < len; i++)
-  {
-    get_hex2_str(buf3, sig_buf[i]);
-    str_buf[i * 2] = buf3[0];
-    str_buf[i * 2 + 1] = buf3[1];
-    printf("%c",str_buf[i*2]);
-    printf("%c", str_buf[i*2 + 1]);
-  }
-
-  str_buf[len * 2] = '\0';
-
-  return str_buf;
-}
