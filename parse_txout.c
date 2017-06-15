@@ -43,14 +43,10 @@ typedef struct script_sig {
   uint64_t len;
 } script_sig;
 
-typedef struct script_pubkey {
-  uint64_t len;
-  char *txt;
-} script_pbk;
-
 typedef struct tx_out {
-  uint8_t value;
-  script_pbk *pbk_ptr;
+  uint64_t value;
+  uint64_t len;
+  char *sc_pbk;
 } tx_out;
 
 
@@ -64,7 +60,9 @@ void cp_sig_hex_to_str(char *sig_str, const uint8_t sig_buf[], const uint64_t le
 void read_op_pushdata0(char *str, uint8_t op_code, FILE *fp);
 void btc_cb_sig(coinbase_sig *sig_ptr, FILE *fp);
 tx_out *read_tx_out_list(uint64_t count, FILE *fp);
-btc_uint1(FILE *fp);
+uint8_t btc_uint1(FILE *fp);
+uint64_t btc_uint8(FILE *fp);
+char *btc_sc_pbk(uint64_t len, FILE *fp);
 
 int main(int argc, char *argv[])
 {
@@ -102,8 +100,6 @@ int main(int argc, char *argv[])
   txin_seqno = btc_uint4(fp);
   tx_vout = btc_varint(fp);
 
-  //txo_list = malloc(tx_vout * sizeof(tx_out));
-
   txo_list = read_tx_out_list(tx_vout, fp);
 
   printf("Tx Version: %u\n", tx_version);
@@ -120,8 +116,10 @@ int main(int argc, char *argv[])
   printf("Txin sequence_no: %x\n", txin_seqno);
 
   printf("Txout Out-counter: %llu\n", tx_vout);
-  for(int i=0; i < count; i++){
-    printf("Txout Value: %u\n", txo_list[i].value);
+  for(int i=0; i < tx_vout; i++){
+    printf("Txout Value: %llu\n", txo_list[i].value);
+    printf("Txout-script length: %llu\n", txo_list[i].len);
+    printf("Txout-script / scriptPubkey: %s\n", txo_list[i].sc_pbk);
   }
   
 
@@ -132,19 +130,42 @@ int main(int argc, char *argv[])
 tx_out *read_tx_out_list(uint64_t count, FILE *fp)
 {
   tx_out *txo_list;
+  uint64_t tmp;
+
   txo_list = (tx_out*) malloc(count * sizeof(tx_out));
   for(uint64_t i=0; i < count; i++){
-    txo_list[i].value = btc_uint1(fp);
+    txo_list[i].value = btc_uint8(fp);
+    tmp = btc_varint(fp);
+    txo_list[i].len = tmp;
+    txo_list[i].sc_pbk = btc_sc_pbk(txo_list[i].len, fp);
   }
 
-  return txo_list
+  return txo_list;
 }
 
-btc_uint1(FILE *fp)
+char *btc_sc_pbk(uint64_t len, FILE *fp)
+{
+  char *sc_pbk;
+  uint8_t *buf;
+  sc_pbk = (char *) malloc((2 * len + 1) * sizeof(char));
+  buf = (uint8_t *) malloc(len * sizeof(uint8_t));
+  fread(buf, sizeof(uint8_t), len, fp);
+  cp_sig_hex_to_str(sc_pbk, buf, len);
+
+  return sc_pbk;
+}
+
+uint64_t btc_uint8(FILE *fp)
+{
+  uint64_t buf;
+  fread(&buf, sizeof(buf), 1, fp);
+  return buf;
+}
+
+uint8_t btc_uint1(FILE *fp)
 {
   uint8_t buf;
   fread(&buf, sizeof(buf), 1, fp);
-
   return buf;
 }
 
@@ -259,7 +280,7 @@ void read_op_pushdata0(char *str, uint8_t op_code, FILE *fp)
 void cp_sig_hex_to_str(char *sig_str, const uint8_t sig_buf[], uint64_t len)
 {
   char buf3[3];
-  for(int64_t i=0; i < len; i++)
+  for(uint64_t i=0; i < len; i++)
   {
     get_hex2_str(buf3, sig_buf[i]);
     sig_str[i * 2] = buf3[0];
