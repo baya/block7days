@@ -139,7 +139,7 @@
 #define NO_FOUND_OPTCODE "NO_FOUND_OPTCODE"
 
 #define SIG_BUF_SIZE 1000
-#define PBK_STACK_SIZE 50
+#define PBK_STACK_SIZE 1000
 
 typedef struct coinbase_sig {
   char sig[SIG_BUF_SIZE];
@@ -216,6 +216,7 @@ int main(int argc, char *argv[])
   coinbase_sig cb_sig;
   uint64_t tx_vout;
   tx_out *txo_list;
+  uint32_t lock_time;
   
 
   sc_sig.len = 0;
@@ -239,6 +240,7 @@ int main(int argc, char *argv[])
   tx_vout = btc_varint(fp);
 
   txo_list = read_tx_out_list(tx_vout, fp);
+  lock_time = btc_uint4(fp);
 
   printf("Tx Version: %u\n", tx_version);
   printf("Tx In-counter: %llu\n", tx_vin);
@@ -260,6 +262,7 @@ int main(int argc, char *argv[])
     printf("Txout-script / scriptPubkey: %s\n", txo_list[i].sc_pbk);
     print_parsed_sc_pbk(txo_list[i].parsed_sc_pbk);
   }
+  printf("Tx Lock Time: %x\n", lock_time);
   
 
   fclose(fp);
@@ -303,8 +306,8 @@ script_pbk *btc_parsed_sc_pbk(uint64_t len, FILE *fp)
     } else {
       *stack_ptr = tr_opcode_to_name(opcode);
     }
-    ++stack_ptr;
-    
+    stack_ptr++;
+
   } while(i < len);
 
 
@@ -458,18 +461,24 @@ void btc_cb_sig(coinbase_sig *sig_ptr, FILE *fp)
 void btc_sc_sig(script_sig *sig_ptr, FILE *fp)
 {
   uint8_t op_code;
+  uint64_t len = 1;
+  
   char buf3[3];
 
   fread(&op_code, sizeof(uint8_t), 1, fp);
   if(op_code >= OP_PUSHDATA0_START && op_code <= OP_PUSHDATA0_END){
+    len += op_code;
     read_op_pushdata0(sig_ptr -> sig, op_code, fp);
   } else {
   }
 
-  fread(&op_code, sizeof(uint8_t), 1, fp);
-  if(op_code >= OP_PUSHDATA0_START && op_code <= OP_PUSHDATA0_END){
-    read_op_pushdata0(sig_ptr -> pubkey, op_code, fp);
-  } else {
+  if(len < sig_ptr->len){
+    fread(&op_code, sizeof(uint8_t), 1, fp);
+    if(op_code >= OP_PUSHDATA0_START && op_code <= OP_PUSHDATA0_END){
+      len += op_code;
+      read_op_pushdata0(sig_ptr -> pubkey, op_code, fp);
+    } else {
+    }
   }
 
 }

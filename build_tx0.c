@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static const uint8_t  VFlag1 = 0xfd;
-static const uint8_t  VFlag2 = 0xfe;
-static const uint8_t  VFlag3 = 0xff;
+static const uint8_t  V_PAD1 = 0xfd;
+static const uint8_t  V_PAD2 = 0xfe;
+static const uint8_t  V_PAD3 = 0xff;
 
 static const uint8_t  N1 = 0xff;
 static const uint16_t N2 = 0xffff;
@@ -59,16 +59,16 @@ int main(int argc, char *argv[])
 
 void encode_btc_varint(btc_varint *vt, uint64_t i)
 {
-  if(i < VFlag1){
+  if(i < V_PAD1){
     vt->va1 = i;
-  } else if(i >= VFlag1 && i <= N2){
-    vt->va1 = VFlag1;
+  } else if(i >= V_PAD1 && i <= N2){
+    vt->va1 = V_PAD1;
     vt->va2 = i;
-  } else if(i >= VFlag2 && i <= N4){
-    vt->va1 = VFlag2;
+  } else if(i >= V_PAD2 && i <= N4){
+    vt->va1 = V_PAD2;
     vt->va4 = i;
-  } else if(i >= VFlag3 && i <= N8){
-    vt->va1 = VFlag3;
+  } else if(i >= V_PAD3 && i <= N8){
+    vt->va1 = V_PAD3;
     vt->va8 = i;
   }
 }
