@@ -3,11 +3,13 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
 
 #define NT_MAGIC_MAIN  0xD9B4BEF9
 #define NT_MAGIC_TEST  0xDAB5BFFA
@@ -23,18 +25,16 @@ static const uint16_t N2 = 0xffff;
 static const uint32_t N4 = 0xffffffff;
 static const uint64_t N8 = 0xffffffffffffffff;
 
-void encode_btc_varint(btc_varint *vt, uint64_t i);
-
-typedef struct var_int {
+typedef struct varint {
   uint8_t  va1;
   uint16_t va2;
   uint32_t va4;
   uint64_t va8;
   uint64_t value;
-} var_int;
+} varint;
 
 typedef struct var_length_string{
-  var_int len;
+  varint len;
   char *str;
 } var_str;
 
@@ -56,27 +56,42 @@ typedef struct protocol_btc_net_addr{
 typedef struct protocol_btc_version{
   int32_t vers;
   uint64_t servs;
-  int64_t ttamp;
-  ptl_net_addr *addr_recv;
-  ptl_net_addr *addr_from;
+  ptl_net_addr *addr_recv_ptr;
+  ptl_net_addr *addr_from_ptr;
   uint64_t nonce;
   var_str uagent;
   int32_t start_height;
   uint8_t relay;
 } ptl_ver;
 
+
+void encode_varint(varint *vt, uint64_t i);
+
 int main(void)
 {
   ptl_msg msg;
+  ptl_ver ver;
+  ptl_net_addr addr_recv;
+  ptl_net_addr addr_from;
 
   msg.magic = NT_MAGIC_MAIN;
-  msg.cmd = "version";
+  strcpy(msg.cmd, "version");
   msg.len = 0;
-  
+
+  ver.vers = 70014;
+  ver.servs = 1;
+  ver.ttamp = (uint64_t)time(NULL);
+
+  addr_recv.servs = 1;
+  addr_recv.ipv;
+  addr_recv.port = 8333;
+
+  printf("cmd: %s\n", msg.cmd);
+  printf("timestamp: %llu\n", ver.ttamp);
 }
 
   
-void encode_btc_varint(btc_varint *vt, uint64_t i)
+void encode_varint(varint *vt, uint64_t i)
 {
   vt->va1 = 0;
   vt->va2 = 0;
