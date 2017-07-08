@@ -1,0 +1,314 @@
+
+btc_client.c,738
+static const uint8_t  V_PAD1 7,81
+static const uint8_t  V_PAD2 8,118
+static const uint8_t  V_PAD3 9,155
+static const uint8_t  N1 11,193
+static const uint16_t N2 12,226
+static const uint32_t N4 13,261
+static const uint64_t N8 14,300
+typedef struct btc_varint 16,348
+} btc_varint;22,458
+typedef struct btc_tx_input 24,473
+} btc_txin;30,621
+typedef struct btc_tx_out 32,634
+} btc_txout;36,724
+typedef struct btc_transaction 38,738
+} btc_tx;44,876
+int main(57,1318
+void print_bin_to_hex(117,3465
+void strtobin(124,3584
+void fill_in_tx(135,3792
+void fill_in_txout(141,3929
+void fill_in_txin(146,4057
+void scpbk_strtobin(151,4179
+void scsig_strtobin(159,4351
+void hash_strtobin(167,4525
+void encode_btc_varint(174,4652
+
+build_tx0.c,592
+static const uint8_t  V_PAD1 6,80
+static const uint8_t  V_PAD2 7,117
+static const uint8_t  V_PAD3 8,154
+static const uint8_t  N1 10,192
+static const uint16_t N2 11,225
+static const uint32_t N4 12,260
+static const uint64_t N8 13,299
+typedef struct btc_varint 15,347
+} btc_varint;20,439
+typedef struct btc_coinbase_sig{btc_coinbase_sig22,454
+} btc_cb_sig;25,521
+typedef struct btc_txin_sc_sig 27,536
+} btc_sc_sig;31,622
+typedef struct btc_tx_input 33,637
+} btc_txin;37,746
+typedef struct btc_transaction 39,759
+} btc_tx;42,836
+int main(47,901
+void encode_btc_varint(60,1137
+
+dummy_malloc1.c,26
+void *malloc(malloc6,76
+
+dummy_malloc2.c,83
+typedef struct s_block *t_block;t_block1,0
+struct s_block 3,34
+int main(10,104
+
+parse_tx.c,89
+typedef struct fread_arg3,20
+} fread_arg;9,118
+int main(13,164
+void tx_fread(59,1194
+
+parse_tx0.c,15
+int main(3,20
+
+parse_tx_version.c,15
+int main(4,21
+
+parse_tx_vinc.c,15
+int main(4,40
+
+parse_txin.c,147
+int main(11,266
+void get_hex2_str(45,1187
+uint32_t btc_uint4(50,1269
+uint64_t btc_varint(58,1369
+void btc_hash(85,1933
+void btc_sig(102,2286
+
+parse_txin_script_sig.c,997
+#define COINBASE_INX 6,80
+#define NULL_HASH 7,118
+#define OP_FALSE 9,213
+#define OP_PUSHDATA0_START 10,245
+#define OP_PUSHDATA0_END 11,277
+#define OP_PUSHDATA1 12,309
+#define OP_PUSHDATA2 13,341
+#define OP_PUSHDATA4 14,373
+#define OP_1NEGATE 15,405
+#define OP_TRUE 16,437
+#define OP_2 17,469
+#define OP_3 18,501
+#define OP_4 19,533
+#define OP_5 20,565
+#define OP_6 21,597
+#define OP_7 22,629
+#define OP_8 23,661
+#define OP_9 24,693
+#define OP_10 25,725
+#define OP_11 26,757
+#define OP_12 27,789
+#define OP_13 28,821
+#define OP_14 29,853
+#define OP_15 30,885
+#define OP_16 31,917
+#define SIG_BUF_SIZE 33,950
+typedef struct coinbase_sig 35,983
+} coinbase_sig;38,1055
+typedef struct script_sig 40,1072
+} script_sig;44,1171
+int main(56,1584
+void get_hex2_str(107,2837
+uint32_t btc_uint4(112,2919
+uint64_t btc_varint(120,3019
+void btc_hash(147,3583
+void btc_cb_sig(164,3918
+void btc_sc_sig(182,4278
+void read_op_pushdata0(202,4728
+void cp_sig_hex_to_str(214,4975
+
+parse_txout.c,1193
+#define COINBASE_INX 6,80
+#define NULL_HASH 7,118
+#define OP_FALSE 9,213
+#define OP_PUSHDATA0_START 10,245
+#define OP_PUSHDATA0_END 11,277
+#define OP_PUSHDATA1 12,309
+#define OP_PUSHDATA2 13,341
+#define OP_PUSHDATA4 14,373
+#define OP_1NEGATE 15,405
+#define OP_TRUE 16,437
+#define OP_2 17,469
+#define OP_3 18,501
+#define OP_4 19,533
+#define OP_5 20,565
+#define OP_6 21,597
+#define OP_7 22,629
+#define OP_8 23,661
+#define OP_9 24,693
+#define OP_10 25,725
+#define OP_11 26,757
+#define OP_12 27,789
+#define OP_13 28,821
+#define OP_14 29,853
+#define OP_15 30,885
+#define OP_16 31,917
+#define SIG_BUF_SIZE 33,950
+typedef struct coinbase_sig 35,983
+} coinbase_sig;38,1055
+typedef struct script_sig 40,1072
+} script_sig;44,1171
+typedef struct tx_out 46,1186
+} tx_out;50,1260
+int main(67,1823
+tx_out *read_tx_out_list(read_tx_out_list130,3461
+char *btc_sc_pbk(btc_sc_pbk146,3820
+uint64_t btc_uint8(158,4104
+uint8_t btc_uint1(165,4203
+void get_hex2_str(173,4301
+uint32_t btc_uint4(178,4383
+uint64_t btc_varint(186,4483
+void btc_hash(213,5047
+void btc_cb_sig(230,5382
+void btc_sc_sig(248,5742
+void read_op_pushdata0(268,6192
+void cp_sig_hex_to_str(280,6439
+
+parse_txout_script_pbk.c,4062
+#define COINBASE_INX 6,80
+#define NULL_HASH 7,118
+#define OP_FALSE 10,229
+#define OP_PUSHDATA0_START 11,261
+#define OP_PUSHDATA0_END 12,293
+#define OP_PUSHDATA1 13,325
+#define OP_PUSHDATA2 14,357
+#define OP_PUSHDATA4 15,389
+#define OP_1NEGATE 16,421
+#define OP_TRUE 17,453
+#define OP_2 18,485
+#define OP_3 19,517
+#define OP_4 20,549
+#define OP_5 21,581
+#define OP_6 22,613
+#define OP_7 23,645
+#define OP_8 24,677
+#define OP_9 25,709
+#define OP_10 26,741
+#define OP_11 27,773
+#define OP_12 28,805
+#define OP_13 29,837
+#define OP_14 30,869
+#define OP_15 31,901
+#define OP_16 32,933
+#define OP_NOP 35,985
+#define OP_IF 36,1008
+#define OP_NOTIF 37,1031
+#define OP_ELSE 38,1054
+#define OP_ENDIF 39,1077
+#define OP_VERIFY 40,1100
+#define OP_RETURN 41,1123
+#define OP_TOALTSTACK 44,1159
+#define OP_FROMALTSTACK 45,1188
+#define OP_IFDUP 46,1217
+#define OP_DEPTH 47,1246
+#define OP_DROP 48,1275
+#define OP_DUP 49,1304
+#define OP_NIP 50,1333
+#define OP_OVER 51,1362
+#define OP_PICK 52,1391
+#define OP_ROLL 53,1420
+#define OP_ROT 54,1449
+#define OP_SWAP 55,1478
+#define OP_TUCK 56,1507
+#define OP_2DROP 57,1536
+#define OP_2DUP 58,1565
+#define OP_3DUP 59,1594
+#define OP_2OVER 60,1623
+#define OP_2ROT 61,1652
+#define OP_2SWAP 62,1681
+#define OP_CAT 65,1724
+#define OP_SUBSTR 66,1747
+#define OP_LEFT 67,1770
+#define OP_RIGHT 68,1793
+#define OP_SIZE 69,1816
+#define OP_INVERT 72,1860
+#define OP_AND 73,1888
+#define OP_OR 74,1916
+#define OP_XOR 75,1944
+#define OP_EQUAL 76,1972
+#define OP_EQUALVERIFY 77,2000
+#define OP_1ADD 80,2046
+#define OP_1SUB 81,2081
+#define OP_2MUL 82,2116
+#define OP_2DIV 83,2151
+#define OP_NEGATE 84,2186
+#define OP_ABS 85,2221
+#define OP_NOT 86,2256
+#define OP_0NOTEQUAL 87,2291
+#define OP_ADD 88,2326
+#define OP_SUB 89,2361
+#define OP_MUL 90,2396
+#define OP_DIV 91,2431
+#define OP_MOD 92,2466
+#define OP_LSHIFT 93,2501
+#define OP_RSHIFT 94,2536
+#define OP_BOOLAND 95,2571
+#define OP_BOOLOR 96,2606
+#define OP_NUMEQUAL 97,2641
+#define OP_NUMEQUALVERIFY 98,2676
+#define OP_NUMNOTEQUAL 99,2711
+#define OP_LESSTHAN 100,2746
+#define OP_GREATERTHAN 101,2781
+#define OP_LESSTHANOREQUAL 102,2816
+#define OP_GREATERTHANOREQUAL 103,2851
+#define OP_MIN 104,2886
+#define OP_MAX 105,2921
+#define OP_WITHIN 106,2956
+#define OP_RIPEMD160 109,3005
+#define OP_SHA1 110,3041
+#define OP_SHA256 111,3077
+#define OP_HASH160 112,3113
+#define OP_HASH256 113,3149
+#define OP_CODESEPARATOR 114,3185
+#define OP_CHECKSIG 115,3221
+#define OP_CHECKSIGVERIFY 116,3257
+#define OP_CHECKMULTISIG 117,3293
+#define OP_CHECKMULTISIGVERIFY 118,3329
+#define OP_CHECKLOCKTIMEVERIFY 121,3381
+#define OP_CHECKSEQUENCEVERIFY 122,3417
+#define OP_PUBKEYHASH 125,3473
+#define OP_PUBKEY 126,3503
+#define OP_INVALIDOPCODE 127,3533
+#define OP_RESERVED 130,3585
+#define OP_VER 131,3611
+#define OP_VERIF 132,3637
+#define OP_VERNOTIF 133,3663
+#define OP_RESERVED1 134,3689
+#define OP_RESERVED2 135,3715
+#define OP_NOP1 136,3741
+#define OP_NOP9 137,3767
+#define NO_FOUND_OPTCODE 139,3794
+#define SIG_BUF_SIZE 141,3839
+#define PBK_STACK_SIZE 142,3865
+typedef struct coinbase_sig 144,3893
+} coinbase_sig;147,3965
+typedef struct script_sig 149,3982
+} script_sig;153,4081
+typedef struct script_pbk 155,4096
+} script_pbk;157,4155
+typedef struct tx_out 159,4170
+} tx_out;164,4273
+static char *btc_sc_opcode_names[btc_sc_opcode_names186,5071
+static uint8_t btc_sc_opcodes[btc_sc_opcodes199,6595
+int main(206,7216
+tx_out *read_tx_out_list(read_tx_out_list274,9001
+script_pbk *btc_parsed_sc_pbk(btc_parsed_sc_pbk292,9475
+void print_parsed_sc_pbk(318,10025
+int is_sc_na_constant(330,10257
+char *tr_opcode_to_name(tr_opcode_to_name339,10409
+char *btc_sc_pbk(btc_sc_pbk360,10736
+uint64_t btc_uint8(372,11020
+uint8_t btc_uint1(379,11119
+void get_hex2_str(387,11217
+uint32_t btc_uint4(392,11299
+uint64_t btc_varint(400,11399
+void btc_hash(427,11963
+void btc_cb_sig(444,12298
+void btc_sc_sig(462,12658
+void read_op_pushdata0(488,13213
+void cp_sig_hex_to_str(499,13469
+
+print_bits.c,21
+void print_bits(1,0
