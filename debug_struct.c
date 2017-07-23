@@ -12,6 +12,7 @@ void set_value2(aa *ptr_item);
 int main()
 {
   aa item;
+  item.value = 100;
   set_value(item);
   printf("++++++++++%d\n", item.value);
 
