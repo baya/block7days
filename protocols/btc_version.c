@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include "beej_pack.h"
 
 
 #define NT_MAGIC_MAIN  0xD9B4BEF9
@@ -120,6 +121,12 @@ void build_version_payload(ptl_ver * ver, ptl_payload *pld)
     ver -> start_height = 329167;
     ver -> relay = 0;
 }
+
+void pack_version(ptl_ver *ver, ptl_payload *pld)
+{
+}
+
+void packi32(unsigned char *buf, )
 
 ptl_net_addr *build_net_addr()
 {
