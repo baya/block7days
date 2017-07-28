@@ -1,0 +1,11 @@
+dbj_pack_objs = debug_beej_pack.o beej_pack.o
+
+debug_beej_pack.out: $(dbj_pack_objs)
+	gcc -o debug_beej_pack.out $(dbj_pack_objs)
+debug_beej_pack.o: beej_pack.h
+beej_pack.o: beej_pack.h
+
+.PHONY : clean
+
+clean:
+	rm $(dbj_pack_objs)

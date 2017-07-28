@@ -323,9 +323,10 @@ unsigned int beej_pack(unsigned char *buf, char *format, ...)
         case 's': // string
             s = va_arg(ap, char*);
             len = strlen(s);
-            size += len + 2;
-            packi16(buf, len);
-            buf += 2;
+            // size += len + 2;
+	    size += len;
+            // packi16(buf, len);
+            // buf += 2;
             memcpy(buf, s, len);
             buf += len;
             break;

@@ -12,7 +12,7 @@ int main()
     unsigned char buf[1024];
     int16_t i = 0x4321;
     char *cptr = (char *)&i;
-    int32_t j = 0x43215678;
+    int32_t j = 70014;
 
     printf("[0]:0x%x\n",*cptr);
     printf("[1]:0x%x\n",*(cptr+1));

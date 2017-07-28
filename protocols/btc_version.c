@@ -57,7 +57,7 @@ typedef struct protocol_btc_message{
 
 typedef struct protocol_btc_net_addr{
     uint64_t servs;
-    char ipv[16];
+    unsigned char ipv[16];
     uint16_t port;
 } ptl_net_addr;
 
@@ -80,12 +80,15 @@ void encode_varint(varint *vt, uint64_t i);
 void build_version_payload(ptl_ver * ver, ptl_payload *pld);
 ptl_net_addr *build_net_addr();
 void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld);
+void pack_version(ptl_ver *ver, ptl_payload *pld);
+static unsigned int pack_ptl_net_addr(ptl_net_addr *na, ptl_payload *pld);
 
 int main(void)
 {
     ptl_msg msg;
     ptl_ver ver;
     ptl_payload pld;
+    uint32_t i;
 
     build_version_payload(&ver, &pld);
     build_btc_message(&msg, "version", &pld);
@@ -95,7 +98,16 @@ int main(void)
     printf("ver.vers: %u\n", ver.vers);
     printf("ver.addr_recv_ptr -> servs: %llu\n", ver.addr_recv_ptr -> servs);
     printf("ver.addr_recv_ptr -> port: %u\n", ver.addr_recv_ptr -> port);
+    //printf("ver.addr_recv_ptr -> ipv: %02x\n", ver.addr_recv_ptr -> ipv[0]);
     printf("ver.ua_len: %llu\n", ver.ua_len.value);
+    printf("pld.len: %u\n", pld.len);
+    printf("pld.buf: ");
+    for(i = 0; i < pld.len; i++){
+	printf("%02x", pld.buf[i]);
+    }
+    printf("\n");
+	
+    
 }
 
 void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
@@ -120,22 +132,94 @@ void build_version_payload(ptl_ver * ver, ptl_payload *pld)
     encode_varint(variptr, 0);
     ver -> start_height = 329167;
     ver -> relay = 0;
+    pld -> len = 0;
+    pack_version(ver, pld);
 }
 
 void pack_version(ptl_ver *ver, ptl_payload *pld)
 {
+    unsigned int size;
+    unsigned char *bufp = pld -> buf;
+    
+    size = beej_pack(bufp, "l", ver -> vers);
+    pld -> len += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "Q", ver -> servs);
+    pld -> len += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "q", ver -> ttamp);
+    pld -> len += size;
+    bufp += size;
+
+    size = pack_ptl_net_addr(ver -> addr_recv_ptr, pld);
+    pld -> len += size;
+    bufp += size;
+
+    size = pack_ptl_net_addr(ver -> addr_from_ptr, pld);
+    pld -> len += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "Q", ver -> nonce);
+    pld -> len += size;
+    bufp += size;
+
 }
 
-void packi32(unsigned char *buf, )
+unsigned int pack_ptl_net_addr(ptl_net_addr *na, ptl_payload *pld)
+{
+    unsigned int size = 0;
+    unsigned int m_size = 0;
+    unsigned char *bufp = pld -> buf;
+
+    bufp += pld -> len;
+    size = beej_pack(bufp, "Q", na -> servs);
+    m_size += size;
+    bufp += size;
+
+    size = 16;
+    memcpy(bufp, na -> ipv, size);
+    m_size += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "H", na -> port);
+    m_size += size;
+    bufp += size;
+
+    return m_size;
+}
+
+unsigned int pack_varint(variant v, ptl_payload *pld)
+{
+    unsigned int size = 0;
+    unsigned int m_size = 0;
+    unsigned char *bufp = pld -> buf;
+
+    bufp += pld -> len;
+
+}
+
 
 ptl_net_addr *build_net_addr()
 {
     ptl_net_addr *na_ptr;
+    char *ip_src = "::ffff:127.0.0.1";
+    int s, domain;
+    
+    domain = AF_INET6;
 
     na_ptr = malloc(sizeof *na_ptr);
     na_ptr -> servs = 1;
     na_ptr -> port = 8333;
-    inet_pton(AF_INET6, LOCAL_IP_SRC, na_ptr -> ipv);
+    s = inet_pton(domain, LOCAL_IP_SRC, na_ptr -> ipv);
+    if (s <= 0) {
+	if (s == 0)
+	    fprintf(stderr, "Not in presentation format");
+	else
+	    perror("inet_pton");
+	exit(EXIT_FAILURE);
+    }
 
     return na_ptr;
 }

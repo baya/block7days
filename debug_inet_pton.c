@@ -10,8 +10,11 @@ int main(void)
     char *src = "::ffff:127.0.0.1";
     char str[INET6_ADDRSTRLEN];
 
+    printf("++++++++++++%lu\n", sizeof(struct in6_addr));
+
     domain = AF_INET6;
     s = inet_pton(domain, src, buf);
+    printf("????????????:%s", buf);
     if (s <= 0) {
 	if (s == 0)
 	    fprintf(stderr, "Not in presentation format");
