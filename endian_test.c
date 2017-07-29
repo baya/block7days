@@ -5,7 +5,9 @@ int is_little_endian();
 int main()
 {
     int i;
-    unsigned int val = 0x12345678;
+    //unsigned int val = 0x12345678;
+    //unsigned int val = 31900;
+    unsigned int val = 0xD9B4BEF9;
     unsigned int lx;
     unsigned int rx;
     printf("[0]:0x%x\n",*((char*)&val + 0));

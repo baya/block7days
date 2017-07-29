@@ -39,7 +39,7 @@ typedef struct varint {
 
 typedef struct var_length_string{
     varint len;
-    char *str;
+    char *body;
 } var_str;
 
 typedef struct protocol_message_payload {
@@ -81,7 +81,10 @@ void build_version_payload(ptl_ver * ver, ptl_payload *pld);
 ptl_net_addr *build_net_addr();
 void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld);
 void pack_version(ptl_ver *ver, ptl_payload *pld);
-static unsigned int pack_ptl_net_addr(ptl_net_addr *na, ptl_payload *pld);
+unsigned int pack_ptl_net_addr(unsigned char *bufp, ptl_net_addr *na);
+unsigned int pack_varint(unsigned char *bufp, varint v);
+void encode_varstr(var_str *vstr, const char *src);
+unsigned int pack_varstr(unsigned char *bufp, var_str vstr);
 
 int main(void)
 {
@@ -120,20 +123,31 @@ void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
 
 void build_version_payload(ptl_ver * ver, ptl_payload *pld)
 {
-    varint *variptr;
-    
-    ver -> vers = 70014;
+    //ver -> vers = 70014;
+    ver -> vers = 31900;
     ver -> servs = 1;
     ver -> ttamp = (int64_t)time(NULL);
     ver -> addr_recv_ptr = build_net_addr();
     ver -> addr_from_ptr = build_net_addr();
     ver -> nonce = 0;
-    variptr = &(ver -> ua_len);
-    encode_varint(variptr, 0);
-    ver -> start_height = 329167;
+    //encode_varstr(&(ver -> uagent), "/Satoshi:0.9.2.1/");
+    encode_varstr(&(ver -> uagent), "");
+    ver -> ua_len = ver -> uagent.len;
+    // ver -> start_height = 329167;
+    ver -> start_height = 98645;
     ver -> relay = 0;
     pld -> len = 0;
     pack_version(ver, pld);
+}
+
+void encode_varstr(var_str *vstr, const char *src)
+{
+    size_t len;
+
+    len = strlen(src);
+    encode_varint(&(vstr -> len), len);
+    vstr -> body = malloc(len * sizeof(char));
+    memcpy(vstr -> body, src, len * sizeof(char));
 }
 
 void pack_version(ptl_ver *ver, ptl_payload *pld)
@@ -153,11 +167,11 @@ void pack_version(ptl_ver *ver, ptl_payload *pld)
     pld -> len += size;
     bufp += size;
 
-    size = pack_ptl_net_addr(ver -> addr_recv_ptr, pld);
+    size = pack_ptl_net_addr(bufp, ver -> addr_recv_ptr);
     pld -> len += size;
     bufp += size;
 
-    size = pack_ptl_net_addr(ver -> addr_from_ptr, pld);
+    size = pack_ptl_net_addr(bufp, ver -> addr_from_ptr);
     pld -> len += size;
     bufp += size;
 
@@ -165,15 +179,25 @@ void pack_version(ptl_ver *ver, ptl_payload *pld)
     pld -> len += size;
     bufp += size;
 
+    size = pack_varint(bufp, ver -> ua_len);
+    pld -> len += size;
+    bufp += size;
+
+    size = pack_varstr(bufp, ver -> uagent);
+    pld -> len += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "l", ver -> start_height);
+    pld -> len += size;
+    bufp += size;
+
 }
 
-unsigned int pack_ptl_net_addr(ptl_net_addr *na, ptl_payload *pld)
+unsigned int pack_ptl_net_addr(unsigned char *bufp, ptl_net_addr *na)
 {
     unsigned int size = 0;
     unsigned int m_size = 0;
-    unsigned char *bufp = pld -> buf;
 
-    bufp += pld -> len;
     size = beej_pack(bufp, "Q", na -> servs);
     m_size += size;
     bufp += size;
@@ -190,14 +214,49 @@ unsigned int pack_ptl_net_addr(ptl_net_addr *na, ptl_payload *pld)
     return m_size;
 }
 
-unsigned int pack_varint(variant v, ptl_payload *pld)
+unsigned int pack_varstr(unsigned char *bufp, var_str vstr)
 {
     unsigned int size = 0;
     unsigned int m_size = 0;
-    unsigned char *bufp = pld -> buf;
 
-    bufp += pld -> len;
+    if(vstr.len.value > 0)
+    {
+	size = vstr.len.value * sizeof(char);
+	memcpy(bufp, vstr.body, size);
+	m_size += size;
 
+    }
+
+    return m_size;
+
+}
+
+unsigned int pack_varint(unsigned char *bufp, varint v)
+{
+    unsigned int size = 0;
+    unsigned int m_size = 0;
+
+    size = beej_pack(bufp, "C", v.va1);
+    m_size += size;
+    bufp += size;
+    
+    if(v.value == 0){
+    } else {
+	if(v.va2 > 0){
+	    size = beej_pack(bufp, "H", v.va2);
+	    m_size += size;
+	}
+	if(v.va4 > 0){
+	    size = beej_pack(bufp, "L", v.va4);
+	    m_size += size;
+	}
+	if(v.va8 > 0){
+	    size = beej_pack(bufp, "Q", v.va8);
+	    m_size += size;
+	}
+    }
+
+    return m_size;
 }
 
 

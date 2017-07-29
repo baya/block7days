@@ -4,8 +4,9 @@
     
 int main(void)
 {
-    char ipv[17] = "bcdefghijklnmxyz";
+    char ipv[] = "bcdefghijklnmxyz";
 
-    printf("ipv[16] len: %lu\n", strlen(ipv));
+    printf("ipv[] len: %lu\n", strlen(ipv));
+    printf("ipv[] size: %lu\n", sizeof ipv);
 }
 

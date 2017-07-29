@@ -13,9 +13,13 @@
 #define unpack754_32(i) (unpack754((i), 32, 8))
 #define unpack754_64(i) (unpack754((i), 64, 11))
 
+
+static unsigned char NUL_BYT_ORD = '\0';
+
 static uint64_t pack754(long double f, unsigned bits, unsigned expbits);
 static long double unpack754(uint64_t i, unsigned bits, unsigned expbits);
 static void packi16(unsigned char *buf, unsigned int i);
+static void packi16_little(unsigned char *buf, unsigned int i);
 static void packi32(unsigned char *buf, unsigned long int i);
 static void packi64(unsigned char *buf, unsigned long long int i);
 static int unpacki16(unsigned char *buf);
@@ -24,6 +28,7 @@ static long int unpacki32(unsigned char *buf);
 static unsigned long int unpacku32(unsigned char *buf);
 static long long int unpacki64(unsigned char *buf);
 static unsigned long long int unpacku64(unsigned char *buf);
+
 
 uint64_t pack754(long double f, unsigned bits, unsigned expbits)
 {
@@ -87,6 +92,12 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
 void packi16(unsigned char *buf, unsigned int i)
 {
     *buf++ = i>>8; *buf++ = i;
+}
+
+void packi16_little(unsigned char *buf, unsigned int i)
+{
+    *buf++ = i << 8;
+    *buf++ = i;
 }
 
 /*
@@ -238,27 +249,44 @@ unsigned int beej_pack(unsigned char *buf, char *format, ...)
 
     unsigned int size = 0;
 
+    unsigned char bytodr = NUL_BYT_ORD;
+
     va_start(ap, format);
 
     for(; *format != '\0'; format++) {
         switch(*format) {
+	case '>': // big-endian
+	    bytodr = '>';
+	    break;
+	    
+	case '<': // little-endian
+	    bytodr = '<';
+	    break;
+	    
         case 'c': // 8-bit
             size += 1;
             c = (signed char)va_arg(ap, int); // promoted
             *buf++ = c;
+	    bytodr = NUL_BYT_ORD;
             break;
 
         case 'C': // 8-bit unsigned
             size += 1;
             C = (unsigned char)va_arg(ap, unsigned int); // promoted
             *buf++ = C;
+	    bytodr = NUL_BYT_ORD;
             break;
 
         case 'h': // 16-bit
             size += 2;
             h = va_arg(ap, int);
-            packi16(buf, h);
+	    if(bytodr == '<'){
+		packi16_little(buf, h);
+	    } else {
+		packi16(buf, h);
+	    }
             buf += 2;
+	    bytodr = NUL_BYT_ORD;
             break;
 
         case 'H': // 16-bit unsigned
