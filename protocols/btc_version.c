@@ -17,6 +17,10 @@
 #define NT_MAGIC_TEST3 0x0709110B
 #define NT_MAGIC_NC    0xFEB4BEF9
 
+#define NODE_NETWORK 1
+#define NODE_GETUTXO 2
+#define NODE_BLOOM 4
+
 #define LOCAL_IP_SRC "::ffff:127.0.0.1"
 #define PL_BUF_SIZE 1024
 
@@ -113,6 +117,14 @@ int main(void)
     
 }
 
+void print_version_payload(ptl_payload *pld)
+{
+}
+
+void print_hex(unsigned char *buf, size_t len, int width, char *note)
+{
+}
+
 void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
 {
     msg -> magic = NT_MAGIC_MAIN;
@@ -124,8 +136,9 @@ void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
 void build_version_payload(ptl_ver * ver, ptl_payload *pld)
 {
     //ver -> vers = 70014;
-    ver -> vers = 31900;
-    ver -> servs = 1;
+    //ver -> vers = 31900;
+    ver -> vers = 70002;
+    ver -> servs = NODE_NETWORK;
     ver -> ttamp = (int64_t)time(NULL);
     ver -> addr_recv_ptr = build_net_addr();
     ver -> addr_from_ptr = build_net_addr();
@@ -133,8 +146,8 @@ void build_version_payload(ptl_ver * ver, ptl_payload *pld)
     //encode_varstr(&(ver -> uagent), "/Satoshi:0.9.2.1/");
     encode_varstr(&(ver -> uagent), "");
     ver -> ua_len = ver -> uagent.len;
-    // ver -> start_height = 329167;
-    ver -> start_height = 98645;
+    ver -> start_height = 329167;
+    //ver -> start_height = 98645;
     ver -> relay = 0;
     pld -> len = 0;
     pack_version(ver, pld);
@@ -155,15 +168,15 @@ void pack_version(ptl_ver *ver, ptl_payload *pld)
     unsigned int size;
     unsigned char *bufp = pld -> buf;
     
-    size = beej_pack(bufp, "l", ver -> vers);
+    size = beej_pack(bufp, "<l", ver -> vers);
     pld -> len += size;
     bufp += size;
 
-    size = beej_pack(bufp, "Q", ver -> servs);
+    size = beej_pack(bufp, "<Q", ver -> servs);
     pld -> len += size;
     bufp += size;
 
-    size = beej_pack(bufp, "q", ver -> ttamp);
+    size = beej_pack(bufp, "<q", ver -> ttamp);
     pld -> len += size;
     bufp += size;
 
@@ -175,7 +188,7 @@ void pack_version(ptl_ver *ver, ptl_payload *pld)
     pld -> len += size;
     bufp += size;
 
-    size = beej_pack(bufp, "Q", ver -> nonce);
+    size = beej_pack(bufp, "<Q", ver -> nonce);
     pld -> len += size;
     bufp += size;
 
@@ -187,7 +200,11 @@ void pack_version(ptl_ver *ver, ptl_payload *pld)
     pld -> len += size;
     bufp += size;
 
-    size = beej_pack(bufp, "l", ver -> start_height);
+    size = beej_pack(bufp, "<l", ver -> start_height);
+    pld -> len += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "C", ver -> relay);
     pld -> len += size;
     bufp += size;
 
@@ -198,7 +215,7 @@ unsigned int pack_ptl_net_addr(unsigned char *bufp, ptl_net_addr *na)
     unsigned int size = 0;
     unsigned int m_size = 0;
 
-    size = beej_pack(bufp, "Q", na -> servs);
+    size = beej_pack(bufp, "<Q", na -> servs);
     m_size += size;
     bufp += size;
 
@@ -207,7 +224,7 @@ unsigned int pack_ptl_net_addr(unsigned char *bufp, ptl_net_addr *na)
     m_size += size;
     bufp += size;
 
-    size = beej_pack(bufp, "H", na -> port);
+    size = beej_pack(bufp, ">H", na -> port);
     m_size += size;
     bufp += size;
 
