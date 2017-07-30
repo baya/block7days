@@ -18,10 +18,12 @@ static unsigned char NUL_BYT_ORD = '\0';
 
 static uint64_t pack754(long double f, unsigned bits, unsigned expbits);
 static long double unpack754(uint64_t i, unsigned bits, unsigned expbits);
-static void packi16(unsigned char *buf, unsigned int i);
+void packi16(unsigned char *buf, unsigned int i, const unsigned char bytord);
 static void packi16_little(unsigned char *buf, unsigned int i);
-static void packi32(unsigned char *buf, unsigned long int i);
-static void packi64(unsigned char *buf, unsigned long long int i);
+void packi32(unsigned char *buf, unsigned long int i, const unsigned char bytord);
+void packi32_little(unsigned char *buf, unsigned long int i);
+static void packi64(unsigned char *buf, unsigned long long int i, const unsigned char bytord);
+void packi64_little(unsigned char *buf, unsigned long long int i);
 static int unpacki16(unsigned char *buf);
 static unsigned int unpacku16(unsigned char *buf);
 static long int unpacki32(unsigned char *buf);
@@ -89,35 +91,68 @@ long double unpack754(uint64_t i, unsigned bits, unsigned expbits)
 /*
 ** packi16() -- store a 16-bit int into a char buffer (like htons())
 */ 
-void packi16(unsigned char *buf, unsigned int i)
+void packi16(unsigned char *buf, unsigned int i, const unsigned char bytord)
 {
-    *buf++ = i>>8; *buf++ = i;
+    if(bytord == '<'){
+	packi16_little(buf, i);
+    } else {
+	*buf++ = i>>8; *buf++ = i;
+    }
+    
 }
 
 void packi16_little(unsigned char *buf, unsigned int i)
 {
-    *buf++ = i << 8;
-    *buf++ = i;
+    *buf++ = ((i << 8) >> 8) & 0xFF;
+    *buf++ = (i >> 8) & 0xFF;
 }
 
 /*
 ** packi32() -- store a 32-bit int into a char buffer (like htonl())
 */ 
-void packi32(unsigned char *buf, unsigned long int i)
+void packi32(unsigned char *buf, unsigned long int i, const unsigned char bytord)
 {
-    *buf++ = i>>24; *buf++ = i>>16;
-    *buf++ = i>>8;  *buf++ = i;
+    if(bytord == '<'){
+	packi32_little(buf, i);
+    } else {
+	*buf++ = i>>24; *buf++ = i>>16;
+	*buf++ = i>>8;  *buf++ = i;
+    }
+}
+
+void packi32_little(unsigned char *buf, unsigned long int i)
+{
+    *buf++ = ((i<<24)>>24) & 0xFF;
+    *buf++ = ((i<<16)>>24) & 0xFF;
+    *buf++ = (i<<8)>>24 & 0xFF;
+    *buf++ = (i >> 24) & 0xFF;
 }
 
 /*
 ** packi64() -- store a 64-bit int into a char buffer (like htonl())
 */ 
-void packi64(unsigned char *buf, unsigned long long int i)
+void packi64(unsigned char *buf, unsigned long long int i, const unsigned char bytodr)
 {
-    *buf++ = i>>56; *buf++ = i>>48;
-    *buf++ = i>>40; *buf++ = i>>32;
-    *buf++ = i>>24; *buf++ = i>>16;
-    *buf++ = i>>8;  *buf++ = i;
+    if(bytodr == '<'){
+	packi64_little(buf, i);
+    } else {
+	*buf++ = i>>56; *buf++ = i>>48;
+	*buf++ = i>>40; *buf++ = i>>32;
+	*buf++ = i>>24; *buf++ = i>>16;
+	*buf++ = i>>8;  *buf++ = i;
+    }
+}
+
+void packi64_little(unsigned char *buf, unsigned long long int i)
+{
+    *buf++ = ((i<<56)>>56) & 0xFF;
+    *buf++ = ((i<<48)>>56) & 0xFF;
+    *buf++ = ((i<<40)>>56) & 0xFF;
+    *buf++ = ((i<<32)>>56) & 0xFF;
+    *buf++ = ((i<<24)>>56) & 0xFF;
+    *buf++ = ((i<<16)>>56) & 0xFF;
+    *buf++ = ((i<<8)>>56) & 0xFF;
+    *buf++ = (i >> 56) & 0xFF;
 }
 
 /*
@@ -212,6 +247,11 @@ unsigned long long int unpacku64(unsigned char *buf)
 /*
 ** pack() -- store data dictated by the format string in the buffer
 **
+**   bits |byte order          float      alignment
+**   -----+------------------------------------------
+**      < |   little-endian    standard     none
+**      > |   big-endian       standard     none
+**
 **   bits |signed   unsigned   float   string
 **   -----+----------------------------------
 **      8 |   c        C         
@@ -280,47 +320,48 @@ unsigned int beej_pack(unsigned char *buf, char *format, ...)
         case 'h': // 16-bit
             size += 2;
             h = va_arg(ap, int);
-	    if(bytodr == '<'){
-		packi16_little(buf, h);
-	    } else {
-		packi16(buf, h);
-	    }
-            buf += 2;
+	    packi16(buf, h, bytodr);
 	    bytodr = NUL_BYT_ORD;
+            buf += 2;
             break;
 
         case 'H': // 16-bit unsigned
             size += 2;
             H = va_arg(ap, unsigned int);
-            packi16(buf, H);
+            packi16(buf, H, bytodr);
+	    bytodr = NUL_BYT_ORD;
             buf += 2;
             break;
 
         case 'l': // 32-bit
             size += 4;
             l = va_arg(ap, long int);
-            packi32(buf, l);
+	    packi32(buf, l, bytodr);
+	    bytodr = NUL_BYT_ORD;
             buf += 4;
             break;
 
         case 'L': // 32-bit unsigned
             size += 4;
             L = va_arg(ap, unsigned long int);
-            packi32(buf, L);
+            packi32(buf, L, bytodr);
+	    bytodr = NUL_BYT_ORD;
             buf += 4;
             break;
 
         case 'q': // 64-bit
             size += 8;
             q = va_arg(ap, long long int);
-            packi64(buf, q);
+            packi64(buf, q, bytodr);
+	    bytodr = NUL_BYT_ORD;
             buf += 8;
             break;
 
         case 'Q': // 64-bit unsigned
             size += 8;
             Q = va_arg(ap, unsigned long long int);
-            packi64(buf, Q);
+            packi64(buf, Q, bytodr);
+	    bytodr = NUL_BYT_ORD;
             buf += 8;
             break;
 
@@ -328,7 +369,8 @@ unsigned int beej_pack(unsigned char *buf, char *format, ...)
             size += 2;
             f = (float)va_arg(ap, double); // promoted
             fhold = pack754_16(f); // convert to IEEE 754
-            packi16(buf, fhold);
+            packi16(buf, fhold, bytodr);
+	    bytodr = NUL_BYT_ORD;
             buf += 2;
             break;
 
@@ -336,7 +378,8 @@ unsigned int beej_pack(unsigned char *buf, char *format, ...)
             size += 4;
             d = va_arg(ap, double);
             fhold = pack754_32(d); // convert to IEEE 754
-            packi32(buf, fhold);
+            packi32(buf, fhold, bytodr);
+	    bytodr = NUL_BYT_ORD;
             buf += 4;
             break;
 
@@ -344,7 +387,8 @@ unsigned int beej_pack(unsigned char *buf, char *format, ...)
             size += 8;
             g = va_arg(ap, long double);
             fhold = pack754_64(g); // convert to IEEE 754
-            packi64(buf, fhold);
+            packi64(buf, fhold, bytodr);
+	    bytodr = NUL_BYT_ORD;
             buf += 8;
             break;
 
