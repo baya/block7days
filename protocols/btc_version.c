@@ -39,6 +39,7 @@ typedef struct varint {
     uint32_t va4;
     uint64_t va8;
     uint64_t value;
+    uint8_t len;
 } varint;
 
 typedef struct var_length_string{
@@ -89,6 +90,9 @@ unsigned int pack_ptl_net_addr(unsigned char *bufp, ptl_net_addr *na);
 unsigned int pack_varint(unsigned char *bufp, varint v);
 void encode_varstr(var_str *vstr, const char *src);
 unsigned int pack_varstr(unsigned char *bufp, var_str vstr);
+void print_version_payload(const ptl_payload *pld);
+size_t print_hex(const unsigned char *buf, size_t len, int width, char *note);
+void read_varint(const unsigned char *buf, varint *vt);
 
 int main(void)
 {
@@ -113,16 +117,90 @@ int main(void)
 	printf("%02x", pld.buf[i]);
     }
     printf("\n");
+
+    print_version_payload(&pld);
 	
+}
+
+void print_version_payload(const ptl_payload *pld)
+{
+    const unsigned char *buf = pld -> buf;
+    varint vt;
+    size_t len = 0;
+    int wth = 36;
     
+    len = print_hex(buf, sizeof(int32_t), wth, "ptl_ver.vers");
+    buf += len;
+    len = print_hex(buf, sizeof(uint64_t), wth, "ptl_ver.servs");
+    buf += len;
+    len = print_hex(buf, sizeof(int64_t), wth, "ptl_ver.ttamp");
+    buf += len;
+    len = print_hex(buf, sizeof(uint64_t), wth, "ptl_ver.addr_recv_ptr -> servs");
+    buf += len;
+    len = print_hex(buf, sizeof(unsigned char) * 16, wth, "ptl_ver.addr_recv_ptr -> ipv");
+    buf += len;
+    len = print_hex(buf, sizeof(uint16_t), wth, "ptl_ver.addr_recv_ptr -> port");
+    buf += len;
+    len = print_hex(buf, sizeof(uint64_t), wth, "ptl_ver.addr_from_ptr -> servs");
+    buf += len;
+    len = print_hex(buf, sizeof(unsigned char) * 16, wth, "ptl_ver.addr_from_ptr -> ipv");
+    buf += len;
+    len = print_hex(buf, sizeof(uint16_t), wth, "ptl_ver.addr_from_ptr -> port");
+    buf += len;
+    len = print_hex(buf, sizeof(uint64_t), wth, "ptl_ver.nonce");
+    buf += len;
+    read_varint(buf, &vt);
+    len = print_hex(buf, vt.len, wth, "ptl_ver.ua_len");
+    buf += len;
+    len = print_hex(buf, vt.value, wth, "ptl_ver.uagent");
+    buf += len;
+    len = print_hex(buf, sizeof(int32_t), wth, "ptl_ver.start_height");
+    buf += len;
+    len = print_hex(buf, sizeof(uint8_t), wth, "ptl_ver.relay");
 }
 
-void print_version_payload(ptl_payload *pld)
+void read_varint(const unsigned char *buf, varint *vt)
 {
+    uint8_t va1 = buf[0];
+    
+    vt -> va1 = va1;
+    vt -> va2 = vt -> va4 = vt -> va8 = 0;
+    vt -> value = 0;
+    vt -> len = 0;
+    
+    if(va1 < 0xFD){
+	vt -> value = va1;
+	vt -> len = sizeof(uint8_t);
+    } else if(va1 == 0xFD){
+	vt -> va2 = buf[0];
+	vt -> value = buf[0];
+	vt -> len = sizeof(uint16_t);
+    } else if(va1 == 0xFE) {
+	vt -> va4 = buf[0];
+	vt -> value = buf[0];
+	vt -> len = sizeof(uint32_t);
+    } else if(va1 == 0xFF) {
+	vt -> va8 = buf[0];
+	vt -> value = buf[0];
+	vt -> len = sizeof(uint64_t);
+    } else {
+    }
 }
 
-void print_hex(unsigned char *buf, size_t len, int width, char *note)
+size_t print_hex(const unsigned char *buf, size_t len, int width, char *note)
 {
+    for(int i=0; i < len; i++){
+	printf("%02x", *buf++);
+    }
+
+    printf(" ");
+    for(int j=len*2; j < width; j++){
+	printf(".");
+    }
+
+    printf(" %s\n", note);
+
+    return len;
 }
 
 void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
@@ -308,18 +386,23 @@ void encode_varint(varint *vt, uint64_t i)
     vt->va2 = 0;
     vt->va4 = 0;
     vt->va8 = 0;
-  
+    vt->len = 0;
+
+    vt->len = sizeof(uint8_t);
     if(i < V_PAD1){
-	vt->va1 = i;
+	vt->va1 = i;	
     } else if(i >= V_PAD1 && i <= N2){
 	vt->va1 = V_PAD1;
 	vt->va2 = i;
+	vt->len += sizeof(uint16_t);
     } else if(i >= V_PAD2 && i <= N4){
 	vt->va1 = V_PAD2;
 	vt->va4 = i;
+	vt->len += sizeof(uint32_t);
     } else if(i >= V_PAD3 && i <= N8){
 	vt->va1 = V_PAD3;
 	vt->va8 = i;
+	vt->len += sizeof(uint64_t);
     }
 
     vt->value = i;
