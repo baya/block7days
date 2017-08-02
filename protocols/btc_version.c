@@ -52,6 +52,11 @@ typedef struct protocol_message_payload {
     unsigned char buf[PL_BUF_SIZE];
 } ptl_payload;
 
+typedef struct protocol_btc_message_buf {
+    uint32_t len;
+    unsigned char body[24+PL_BUF_SIZE];
+} ptl_msg_buf;
+
 typedef struct protocol_btc_message{
     uint32_t magic;
     char cmd[12];
@@ -97,6 +102,7 @@ void read_varint(const unsigned char *buf, varint *vt);
 int main(void)
 {
     ptl_msg msg;
+    ptl_msg_buf msg_buf;
     ptl_ver ver;
     ptl_payload pld;
     uint32_t i;
@@ -162,6 +168,7 @@ void print_version_payload(const ptl_payload *pld)
 void read_varint(const unsigned char *buf, varint *vt)
 {
     uint8_t va1 = buf[0];
+    unsigned char *bbuf = (unsigned char *) buf;
     
     vt -> va1 = va1;
     vt -> va2 = vt -> va4 = vt -> va8 = 0;
@@ -172,16 +179,16 @@ void read_varint(const unsigned char *buf, varint *vt)
 	vt -> value = va1;
 	vt -> len = sizeof(uint8_t);
     } else if(va1 == 0xFD){
-	vt -> va2 = buf[0];
-	vt -> value = buf[0];
+	beej_unpack(bbuf++, "<H", &(vt->va2));
+	vt -> value = vt -> va2;
 	vt -> len = sizeof(uint16_t);
     } else if(va1 == 0xFE) {
-	vt -> va4 = buf[0];
-	vt -> value = buf[0];
+	beej_unpack(bbuf++, "<L", &(vt->va4));
+	vt -> value = vt -> va4;
 	vt -> len = sizeof(uint32_t);
     } else if(va1 == 0xFF) {
-	vt -> va8 = buf[0];
-	vt -> value = buf[0];
+	beej_unpack(bbuf++, "<Q", &(vt->va8));
+	vt -> value = vt -> va8;
 	vt -> len = sizeof(uint64_t);
     } else {
     }
@@ -209,6 +216,27 @@ void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
     strcpy(msg -> cmd, cmd);
     msg -> len = pld -> len;
     msg -> pld_ptr = pld;
+}
+
+void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg)
+{
+    unsigned char *buf = msg_buf -> body;
+    size_t size=0;
+    
+    msg_buf -> len = 0;
+    size = beej_pack(buf, "<L", NT_MAGIC_MAIN);
+    msg_buf -> len += size;
+    buf += size;
+
+    size = sizeof(msg -> cmd);
+    memcpy(buf, msg -> cmd, size);
+    msg_buf -> len += size;
+    buf += size;
+    
+    size = beej_pack(buf, "<L", (msg -> pld_ptr) -> len);
+    msg_buf -> len += size;
+    buf += size;
+    
 }
 
 void build_version_payload(ptl_ver * ver, ptl_payload *pld)
