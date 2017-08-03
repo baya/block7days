@@ -9,6 +9,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <openssl/sha.h>
+
 #include "beej_pack.h"
 
 
@@ -98,6 +100,8 @@ unsigned int pack_varstr(unsigned char *bufp, var_str vstr);
 void print_version_payload(const ptl_payload *pld);
 size_t print_hex(const unsigned char *buf, size_t len, int width, char *note);
 void read_varint(const unsigned char *buf, varint *vt);
+void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg);
+void print_msg_buf(const ptl_msg_buf *msg_buf);
 
 int main(void)
 {
@@ -109,13 +113,13 @@ int main(void)
 
     build_version_payload(&ver, &pld);
     build_btc_message(&msg, "version", &pld);
+    pack_btc_message(&msg_buf, &msg);
 
     printf("msg.cmd: %s\n", msg.cmd);
     printf("msg.len: %u\n", msg.len);
     printf("ver.vers: %u\n", ver.vers);
     printf("ver.addr_recv_ptr -> servs: %llu\n", ver.addr_recv_ptr -> servs);
     printf("ver.addr_recv_ptr -> port: %u\n", ver.addr_recv_ptr -> port);
-    //printf("ver.addr_recv_ptr -> ipv: %02x\n", ver.addr_recv_ptr -> ipv[0]);
     printf("ver.ua_len: %llu\n", ver.ua_len.value);
     printf("pld.len: %u\n", pld.len);
     printf("pld.buf: ");
@@ -124,8 +128,23 @@ int main(void)
     }
     printf("\n");
 
+    print_msg_buf(&msg_buf);
     print_version_payload(&pld);
 	
+}
+
+void print_msg_buf(const ptl_msg_buf *msg_buf)
+{
+    const unsigned char *buf = msg_buf -> body;
+    size_t len = 0;
+    int wth = 36;
+
+    len = print_hex(buf, sizeof(uint32_t), wth, "Start String: Mainnet");
+    buf += len;
+    len = print_hex(buf, 12, wth, "Command name");
+    buf += len;
+    len = print_hex(buf, sizeof(uint32_t), wth, "Payload size");
+    buf += len;
 }
 
 void print_version_payload(const ptl_payload *pld)
