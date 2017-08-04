@@ -149,6 +149,10 @@ void print_msg_buf(const ptl_msg_buf *msg_buf)
 
     len = print_hex(buf, 4, wth, "Checksum");
     buf += len;
+
+    len = msg_buf -> len - 24;
+    len = print_hex(buf, len, wth, "Payload");
+    buf += len;
 }
 
 void print_version_payload(const ptl_payload *pld)
@@ -266,6 +270,11 @@ void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg)
 
     size = sizeof(msg -> checksum);
     memcpy(buf, msg -> checksum, size);
+    msg_buf -> len += size;
+    buf += size;
+
+    size = msg -> pld_ptr -> len;
+    memcpy(buf, msg -> pld_ptr -> buf, size);
     msg_buf -> len += size;
     buf += size;
     
