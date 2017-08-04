@@ -1,5 +1,5 @@
 dbj_pack_objs = debug_beej_pack.o beej_pack.o
-btc_ver_objs = btc_version.o beej_pack.o
+btc_ver_objs = btc_version.o beej_pack.o kyk_sha.o
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 
@@ -9,13 +9,16 @@ debug_beej_pack.o: debug_beej_pack.c beej_pack.h
 	gcc -c debug_beej_pack.c
 
 btc_version.out: $(btc_ver_objs)
-	cc -o btc_version.out $(btc_ver_objs)
+	gcc -o btc_version.out $(btc_ver_objs) -L$(l_paths) -lcrypto
 
 beej_pack.o: beej_pack.c beej_pack.h
-	cc -c beej_pack.c
+	gcc -c beej_pack.c
 
-btc_version.o: btc_version.c beej_pack.h
-	cc -c btc_version.c -I$(i_paths) -L$(l_paths) -lcrypto
+kyk_sha.o: kyk_sha.c kyk_sha.h
+	gcc -c kyk_sha.c -I$(i_paths)
+
+btc_version.o: btc_version.c beej_pack.h kyk_sha.h
+	gcc -c btc_version.c
 
 
 clean:

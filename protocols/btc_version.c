@@ -9,8 +9,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <openssl/sha.h>
 
+#include "kyk_sha.h"
 #include "beej_pack.h"
 
 
@@ -63,7 +63,7 @@ typedef struct protocol_btc_message{
     uint32_t magic;
     char cmd[12];
     uint32_t len;
-    uint32_t checksum;
+    char checksum[4];
     ptl_payload *pld_ptr;
 } ptl_msg;
 
@@ -102,6 +102,7 @@ size_t print_hex(const unsigned char *buf, size_t len, int width, char *note);
 void read_varint(const unsigned char *buf, varint *vt);
 void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg);
 void print_msg_buf(const ptl_msg_buf *msg_buf);
+unsigned char * dble_sha256(const char *str);
 
 int main(void)
 {
@@ -144,6 +145,9 @@ void print_msg_buf(const ptl_msg_buf *msg_buf)
     len = print_hex(buf, 12, wth, "Command name");
     buf += len;
     len = print_hex(buf, sizeof(uint32_t), wth, "Payload size");
+    buf += len;
+
+    len = print_hex(buf, 4, wth, "Checksum");
     buf += len;
 }
 
@@ -231,10 +235,14 @@ size_t print_hex(const unsigned char *buf, size_t len, int width, char *note)
 
 void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
 {
+    unsigned char *dg2;
+    
     msg -> magic = NT_MAGIC_MAIN;
     strcpy(msg -> cmd, cmd);
     msg -> len = pld -> len;
     msg -> pld_ptr = pld;
+    dg2 = dble_sha256((char *)pld -> buf);
+    memcpy(msg -> checksum, dg2, 4);
 }
 
 void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg)
@@ -255,7 +263,25 @@ void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg)
     size = beej_pack(buf, "<L", (msg -> pld_ptr) -> len);
     msg_buf -> len += size;
     buf += size;
+
+    size = sizeof(msg -> checksum);
+    memcpy(buf, msg -> checksum, size);
+    msg_buf -> len += size;
+    buf += size;
     
+}
+
+unsigned char * dble_sha256(const char *str)
+{
+    unsigned char *dg1;
+    unsigned char *dg2;
+    
+    dg1 = kyk_sha256(str);
+    dg2 = kyk_sha256((char *)dg1);
+    
+    free(dg1);
+
+    return dg2;
 }
 
 void build_version_payload(ptl_ver * ver, ptl_payload *pld)
