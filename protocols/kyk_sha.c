@@ -19,6 +19,21 @@ unsigned char * kyk_sha256(const char *str)
 }
 
 
+unsigned char * kyk_dble_sha256(const char *str)
+{
+    unsigned char *dg1;
+    unsigned char *dg2;
+    
+    dg1 = kyk_sha256(str);
+    dg2 = kyk_sha256((char *)dg1);
+    
+    free(dg1);
+
+    return dg2;
+}
+
+
+
 
 
 
