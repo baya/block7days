@@ -54,7 +54,7 @@ int main(void)
     build_btc_message(&msg, "version", &pld);
     pack_btc_message(&msg_buf, &msg);
 
-    //kyk_send_btc_msg_buf("seed.bitcoin.sipa.be", "8333", &msg_buf);
+    kyk_send_btc_msg_buf("seed.bitcoin.sipa.be", "8333", &msg_buf);
 
     printf("msg.cmd: %s\n", msg.cmd);
     printf("msg.len: %u\n", msg.len);
@@ -191,7 +191,7 @@ void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
     strcpy(msg -> cmd, cmd);
     msg -> len = pld -> len;
     msg -> pld_ptr = pld;
-    dg2 = kyk_dble_sha256((char *)pld -> buf);
+    dg2 = kyk_dble_sha256((char *)pld -> buf, (size_t)pld -> len);
     //byte_swap(dg2, SHA256_DIGEST_LENGTH);
     memcpy(msg -> checksum, dg2, 4);
 }
