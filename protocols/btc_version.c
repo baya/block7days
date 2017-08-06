@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <openssl/sha.h>
 
 #include "btc_message.h"
 #include "kyk_sha.h"
@@ -39,6 +40,7 @@ size_t print_hex(const unsigned char *buf, size_t len, int width, char *note);
 void read_varint(const unsigned char *buf, varint *vt);
 void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg);
 void print_msg_buf(const ptl_msg_buf *msg_buf);
+void byte_swap(unsigned char* data, int len);
 
 int main(void)
 {
@@ -52,7 +54,7 @@ int main(void)
     build_btc_message(&msg, "version", &pld);
     pack_btc_message(&msg_buf, &msg);
 
-    kyk_send_btc_msg_buf("seed.bitcoin.sipa.be", "8333", &msg_buf);
+    //kyk_send_btc_msg_buf("seed.bitcoin.sipa.be", "8333", &msg_buf);
 
     printf("msg.cmd: %s\n", msg.cmd);
     printf("msg.len: %u\n", msg.len);
@@ -91,6 +93,12 @@ void print_msg_buf(const ptl_msg_buf *msg_buf)
     len = msg_buf -> len - 24;
     len = print_hex(buf, len, wth, "Payload");
     buf += len;
+
+    for(int i=0; i < msg_buf -> len; i++){
+	printf("%02x", msg_buf -> body[i]);
+    }
+
+    printf("\n");
 }
 
 void print_version_payload(const ptl_payload *pld)
@@ -121,7 +129,7 @@ void print_version_payload(const ptl_payload *pld)
     len = print_hex(buf, sizeof(uint64_t), wth, "ptl_ver.nonce");
     buf += len;
     read_varint(buf, &vt);
-    len = print_hex(buf, vt.len, wth, "ptl_ver.ua_len");
+    len = print_hex(buf, sizeof(uint16_t), wth, "ptl_ver.ua_len");
     buf += len;
     len = print_hex(buf, vt.value, wth, "ptl_ver.uagent");
     buf += len;
@@ -184,6 +192,7 @@ void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
     msg -> len = pld -> len;
     msg -> pld_ptr = pld;
     dg2 = kyk_dble_sha256((char *)pld -> buf);
+    //byte_swap(dg2, SHA256_DIGEST_LENGTH);
     memcpy(msg -> checksum, dg2, 4);
 }
 
@@ -225,7 +234,9 @@ void build_version_payload(ptl_ver * ver, ptl_payload *pld)
     //ver -> vers = 31900;
     ver -> vers = 70014;
     ver -> servs = NODE_NETWORK;
-    ver -> ttamp = (int64_t)time(NULL);
+    //ver -> ttamp = (int64_t)time(NULL);
+    //ver -> ttamp = 0x73bc8659;
+    ver -> ttamp = 0x5986bc73;
     ver -> addr_recv_ptr = build_net_addr();
     ver -> addr_from_ptr = build_net_addr();
     ver -> nonce = 0;
@@ -279,6 +290,7 @@ void pack_version(ptl_ver *ver, ptl_payload *pld)
     bufp += size;
 
     size = pack_varint(bufp, ver -> ua_len);
+    size = beej_pack(bufp, "<H", 0);
     pld -> len += size;
     bufp += size;
 
@@ -290,9 +302,9 @@ void pack_version(ptl_ver *ver, ptl_payload *pld)
     pld -> len += size;
     bufp += size;
 
-    size = beej_pack(bufp, "C", ver -> relay);
-    pld -> len += size;
-    bufp += size;
+    /* size = beej_pack(bufp, "C", ver -> relay); */
+    /* pld -> len += size; */
+    /* bufp += size; */
 
 }
 
@@ -414,4 +426,25 @@ void encode_varint(varint *vt, uint64_t i)
     }
 
     vt->value = i;
+}
+
+
+void byte_swap(unsigned char* data, int len)
+{
+    int c;
+    unsigned char tmp[len];
+       
+    c=0;
+    while(c<len)
+    {
+	tmp[c] = data[len-(c+1)];
+	c++;
+    }
+       
+    c=0;
+    while(c<len)
+    {
+	data[c] = tmp[c];
+	c++;
+    }
 }

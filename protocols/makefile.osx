@@ -21,7 +21,13 @@ kyk_socket.o: kyk_socket.c kyk_socket.h btc_message.h
 	gcc -c kyk_socket.c
 
 btc_version.o: btc_version.c beej_pack.h kyk_sha.h btc_message.h kyk_socket.h
-	gcc -c btc_version.c
+	gcc -c btc_version.c -I$(i_paths)
+
+debug_hashblock.out: debug_hashblock.o kyk_sha.o
+	cc -o debug_hashblock.out debug_hashblock.o kyk_sha.o -L$(l_paths) -lcrypto
+
+debug_hashblock.o: debug_hashblock.c kyk_sha.h
+	cc -c debug_hashblock.c -I$(i_paths)
 
 
 clean:
