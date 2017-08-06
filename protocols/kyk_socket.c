@@ -95,11 +95,12 @@ void kyk_send_btc_msg_buf(const char *node, const char *service, const ptl_msg_b
 	exit(EXIT_FAILURE);
     }
 
+    printf("Received %zd bytes: %s\n", nread, resp_buf);
     for(int i=0; i < nread; i++){
 	printf("%c", resp_buf[i]);
     }
+
     printf("\n");
-    printf("Received %zd bytes: %s\n", nread, resp_buf);
 
 }
 
