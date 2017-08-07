@@ -40,7 +40,6 @@ size_t print_hex(const unsigned char *buf, size_t len, int width, char *note);
 void read_varint(const unsigned char *buf, varint *vt);
 void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg);
 void print_msg_buf(const ptl_msg_buf *msg_buf);
-void byte_swap(unsigned char* data, int len);
 
 int main(void)
 {
@@ -238,8 +237,8 @@ void build_version_payload(ptl_ver * ver, ptl_payload *pld)
     ver -> servs = NODE_NETWORK;
     //ver -> ttamp = (int64_t)time(NULL);
     //ver -> ttamp = 0x73bc8659;
-    ver -> ttamp = 0x5986bc73;
-    //ver -> ttamp = (int64_t)time(NULL);
+    //ver -> ttamp = 0x5986bc73;
+    ver -> ttamp = (int64_t)time(NULL);
     ver -> addr_recv_ptr = build_net_addr();
     ver -> addr_from_ptr = build_net_addr();
     ver -> nonce = 0;
@@ -432,22 +431,3 @@ void encode_varint(varint *vt, uint64_t i)
 }
 
 
-void byte_swap(unsigned char* data, int len)
-{
-    int c;
-    unsigned char tmp[len];
-       
-    c=0;
-    while(c<len)
-    {
-	tmp[c] = data[len-(c+1)];
-	c++;
-    }
-       
-    c=0;
-    while(c<len)
-    {
-	data[c] = tmp[c];
-	c++;
-    }
-}
