@@ -239,6 +239,7 @@ void build_version_payload(ptl_ver * ver, ptl_payload *pld)
     //ver -> ttamp = (int64_t)time(NULL);
     //ver -> ttamp = 0x73bc8659;
     ver -> ttamp = 0x5986bc73;
+    //ver -> ttamp = (int64_t)time(NULL);
     ver -> addr_recv_ptr = build_net_addr();
     ver -> addr_from_ptr = build_net_addr();
     ver -> nonce = 0;
