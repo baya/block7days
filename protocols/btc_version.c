@@ -56,21 +56,23 @@ int main(void)
 
     kyk_send_btc_msg_buf("seed.bitcoin.sipa.be", "8333", &msg_buf);
 
-    printf("msg.cmd: %s\n", msg.cmd);
-    printf("msg.len: %u\n", msg.len);
-    printf("ver.vers: %u\n", ver.vers);
-    printf("ver.addr_recv_ptr -> servs: %llu\n", ver.addr_recv_ptr -> servs);
-    printf("ver.addr_recv_ptr -> port: %u\n", ver.addr_recv_ptr -> port);
-    printf("ver.ua_len: %llu\n", ver.ua_len.value);
-    printf("pld.len: %u\n", pld.len);
-    printf("pld.buf: ");
-    for(i = 0; i < pld.len; i++){
-	printf("%02x", pld.buf[i]);
-    }
-    printf("\n");
+    /* printf("msg.cmd: %s\n", msg.cmd); */
+    /* printf("msg.len: %u\n", msg.len); */
+    /* printf("ver.vers: %u\n", ver.vers); */
+    /* printf("ver.addr_recv_ptr -> servs: %llu\n", ver.addr_recv_ptr -> servs); */
+    /* printf("ver.addr_recv_ptr -> port: %u\n", ver.addr_recv_ptr -> port); */
+    /* printf("ver.ua_len: %llu\n", ver.ua_len.value); */
+    /* printf("pld.len: %u\n", pld.len); */
+    /* printf("pld.buf: "); */
+    /* for(i = 0; i < pld.len; i++){ */
+    /* 	printf("%02x", pld.buf[i]); */
+    /* } */
+    /* printf("\n"); */
 
+#ifdef DEBUG
     print_msg_buf(&msg_buf);
     print_version_payload(&pld);
+#endif
 	
 }
 

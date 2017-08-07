@@ -77,12 +77,14 @@ void kyk_send_btc_msg_buf(const char *node, const char *service, const ptl_msg_b
 	exit(EXIT_FAILURE);
     }
 
+#ifdef DEBUG
+    printf("msg buf: ");
     for(int i=0; i < len; i++)
     {
 	printf("%02x", msg_buf -> body[i]);
     }
-
     printf("\n");
+#endif
 
     if (write(sfd, msg_buf -> body, len) != len) {
 	fprintf(stderr, "partial/failed write\n");
