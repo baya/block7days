@@ -14,7 +14,8 @@ int main(void)
     unsigned char digest[SHA256_DIGEST_LENGTH];
     const char* string = "hello world";
     unsigned char digest2[SHA256_DIGEST_LENGTH];
-    const char *str2 = "hello world";
+    //const char *str2 = "hello world";
+    const char *str2 = "";
     unsigned char *dg1;
     unsigned char *dg2;
 

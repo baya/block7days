@@ -1,5 +1,5 @@
 dbj_pack_objs = debug_beej_pack.o beej_pack.o
-btc_ver_objs = btc_version.o beej_pack.o kyk_sha.o kyk_socket.o
+btc_ver_objs = btc_version.o beej_pack.o kyk_sha.o kyk_socket.o btc_message.o
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 
@@ -22,6 +22,9 @@ kyk_sha.o: kyk_sha.c kyk_sha.h
 
 kyk_socket.o: kyk_socket.c kyk_socket.h btc_message.h
 	$(CC) $(CCFLAGS) -c kyk_socket.c
+
+btc_message.o: btc_message.c btc_message.h
+	$(CC) $(CCFLAGS) -c btc_message.c
 
 btc_version.o: btc_version.c beej_pack.h kyk_sha.h btc_message.h kyk_socket.h
 	$(CC) $(CCFLAGS) -c btc_version.c -I$(i_paths)

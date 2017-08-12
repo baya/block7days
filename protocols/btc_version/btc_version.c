@@ -44,16 +44,28 @@ void print_msg_buf(const ptl_msg_buf *msg_buf);
 int main(void)
 {
     ptl_msg msg;
+    ptl_msg *resp_msg;
     ptl_msg_buf msg_buf;
     ptl_ver ver;
     ptl_payload pld;
     uint32_t i;
+    ptl_resp_buf resp_buf;
 
     build_version_payload(&ver, &pld);
     build_btc_message(&msg, "version", &pld);
     pack_btc_message(&msg_buf, &msg);
 
-    kyk_send_btc_msg_buf("seed.bitcoin.sipa.be", "8333", &msg_buf);
+    kyk_send_btc_msg_buf("seed.bitcoin.sipa.be", "8333", &msg_buf, &resp_buf);
+    resp_msg = unpack_resp_buf(&resp_buf);
+
+    printf("resp_msg -> magic: %02x\n", resp_msg -> magic);
+    printf("resp_msg -> cmd: %s\n", resp_msg -> cmd);
+    printf("resp_msg -> len: %u\n", resp_msg -> len);
+    printf("resp_msg -> checksum:");
+    for(int jj=0; jj < 4; jj++){
+	printf("%02x", (unsigned char) resp_msg -> checksum[jj]);
+    }
+    printf("\n");
 
     /* printf("msg.cmd: %s\n", msg.cmd); */
     /* printf("msg.len: %u\n", msg.len); */
@@ -193,7 +205,6 @@ void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld)
     msg -> len = pld -> len;
     msg -> pld_ptr = pld;
     dg2 = kyk_dble_sha256((char *)pld -> buf, (size_t)pld -> len);
-    //byte_swap(dg2, SHA256_DIGEST_LENGTH);
     memcpy(msg -> checksum, dg2, 4);
 }
 

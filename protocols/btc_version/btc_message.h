@@ -14,6 +14,7 @@
 #define LOCAL_IP_SRC "::ffff:127.0.0.1"
 #define PL_BUF_SIZE 1024
 
+
 typedef struct varint {
     uint8_t  va1;
     uint16_t va2;
@@ -65,5 +66,12 @@ typedef struct protocol_btc_version{
     uint8_t relay;
     uint32_t len;
 } ptl_ver;
+
+typedef struct protocol_resp_buf{
+    char cmdname[12];
+    unsigned char body[PL_BUF_SIZE];
+} ptl_resp_buf;
+
+ptl_msg * unpack_resp_buf(ptl_resp_buf *resp_buf);
 
 #endif

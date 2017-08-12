@@ -22,14 +22,14 @@
 /*     struct addrinfo *ai_next; */
 /* }; */
 
-void kyk_send_btc_msg_buf(const char *node, const char *service, const ptl_msg_buf *msg_buf)
+void kyk_send_btc_msg_buf(const char *node, const char *service, const ptl_msg_buf *msg_buf, ptl_resp_buf *resp_buf)
 {
     struct addrinfo hints;
     struct addrinfo *result, *rp;
     int sfd, s, j;
     size_t len;
     ssize_t nread;    
-    char resp_buf[MAX_BUF_SIZE];
+    unsigned char resp_body[MAX_BUF_SIZE];
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family = AF_UNSPEC;    /* Allow IPv4 or IPv6 */
@@ -91,16 +91,18 @@ void kyk_send_btc_msg_buf(const char *node, const char *service, const ptl_msg_b
 	exit(EXIT_FAILURE);
     }
 
-    nread = recv(sfd, resp_buf, MAX_BUF_SIZE-1, 0);
+    nread = recv(sfd, resp_body, MAX_BUF_SIZE-1, 0);
     if (nread == -1) {
 	perror("read");
 	exit(EXIT_FAILURE);
     }
 
-    printf("Received %zd bytes: %s\n", nread, resp_buf);
+    printf("Received %zd bytes: %s\n", nread, resp_body);
     for(int i=0; i < nread; i++){
-	printf("%c", resp_buf[i]);
+	printf("%c", resp_body[i]);
     }
+
+    memcpy(resp_buf -> body, resp_body, nread);
 
     printf("\n");
 
