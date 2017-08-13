@@ -50,6 +50,7 @@ int main(void)
     ptl_payload pld;
     uint32_t i;
     ptl_resp_buf resp_buf;
+    ptl_msg_buf resp_msg_buf;
 
     build_version_payload(&ver, &pld);
     build_btc_message(&msg, "version", &pld);
@@ -58,14 +59,18 @@ int main(void)
     kyk_send_btc_msg_buf("seed.bitcoin.sipa.be", "8333", &msg_buf, &resp_buf);
     resp_msg = unpack_resp_buf(&resp_buf);
 
-    printf("resp_msg -> magic: %02x\n", resp_msg -> magic);
-    printf("resp_msg -> cmd: %s\n", resp_msg -> cmd);
-    printf("resp_msg -> len: %u\n", resp_msg -> len);
-    printf("resp_msg -> checksum:");
-    for(int jj=0; jj < 4; jj++){
-	printf("%02x", (unsigned char) resp_msg -> checksum[jj]);
-    }
-    printf("\n");
+    pack_btc_message(&resp_msg_buf, resp_msg);
+
+    /* printf("resp_msg -> magic: %02x\n", resp_msg -> magic); */
+    /* printf("resp_msg -> cmd: %s\n", resp_msg -> cmd); */
+    /* printf("resp_msg -> len: %u\n", resp_msg -> len); */
+    /* printf("resp_msg -> checksum:"); */
+    /* for(int jj=0; jj < 4; jj++){ */
+    /* 	printf("%02x", (unsigned char) resp_msg -> checksum[jj]); */
+    /* } */
+    /* printf("\n"); */
+    print_msg_buf(&resp_msg_buf);
+    print_version_payload(resp_msg -> pld_ptr);
 
     /* printf("msg.cmd: %s\n", msg.cmd); */
     /* printf("msg.len: %u\n", msg.len); */
@@ -96,6 +101,7 @@ void print_msg_buf(const ptl_msg_buf *msg_buf)
     len = print_hex(buf, sizeof(uint32_t), wth, "Start String: Mainnet");
     buf += len;
     len = print_hex(buf, 12, wth, "Command name");
+    printf("Command name: %s\n", buf);
     buf += len;
     len = print_hex(buf, sizeof(uint32_t), wth, "Payload size");
     buf += len;
@@ -145,6 +151,7 @@ void print_version_payload(const ptl_payload *pld)
     len = print_hex(buf, sizeof(uint16_t), wth, "ptl_ver.ua_len");
     buf += len;
     len = print_hex(buf, vt.value, wth, "ptl_ver.uagent");
+    printf("uagent: %s\n", buf);
     buf += len;
     len = print_hex(buf, sizeof(int32_t), wth, "ptl_ver.start_height");
     buf += len;

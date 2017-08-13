@@ -10,6 +10,7 @@ ptl_msg * unpack_resp_buf(ptl_resp_buf *resp_buf)
 {
     unsigned char *bptr;
     ptl_msg *msg = malloc(sizeof(ptl_msg));
+    ptl_payload *pd = malloc(sizeof(ptl_payload));
 
     bptr = resp_buf -> body;
     beej_unpack(bptr, "<L", &(msg -> magic));
@@ -22,6 +23,12 @@ ptl_msg * unpack_resp_buf(ptl_resp_buf *resp_buf)
     bptr += 4;
 
     memcpy(msg -> checksum, bptr, 4);
+    bptr += 4;
+
+    pd -> len = msg -> len;
+    memcpy(pd -> buf, bptr, pd -> len);
+
+    msg -> pld_ptr = pd;
     
 
     return msg;
