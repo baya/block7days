@@ -73,5 +73,8 @@ typedef struct protocol_resp_buf{
 } ptl_resp_buf;
 
 ptl_msg * unpack_resp_buf(ptl_resp_buf *resp_buf);
+void print_msg_buf(const ptl_msg_buf *msg_buf);
+void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld);
+void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg);
 
 #endif
