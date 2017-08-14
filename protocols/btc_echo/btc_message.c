@@ -65,7 +65,7 @@ void print_msg_buf(const ptl_msg_buf *msg_buf)
     printf("\n");
 }
 
-size_t print_hex(const unsigned char *buf, size_t len, int width, char *note)
+static size_t print_hex(const unsigned char *buf, size_t len, int width, char *note)
 {
     for(int i=0; i < len; i++){
 	printf("%02x", *buf++);

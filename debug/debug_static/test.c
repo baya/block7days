@@ -3,6 +3,7 @@
 #include "test.h"
 
 static void b();
+// void b();
 
 void f()
 {
