@@ -98,6 +98,7 @@ int main(void)
 	    continue;
 	}
 
+	// convert IPv4 and IPv6 addresses from binary to text form, s will store the converted result
 	inet_ntop(their_addr.ss_family,
 		  get_in_addr((struct sockaddr *)&their_addr),
 		  s, sizeof s);
@@ -115,6 +116,23 @@ int main(void)
 
     return 0;
 	
+}
+
+ssize_t recv_all(int sockfd, void *buf, size_t len, int flags)
+{
+    unsigned char *bptr = (unsigned char *) buf;
+    while(len > 0)
+    {
+	int i = recv(sockfd, bptr, len, flags);
+	if(i == -1){
+	    return -1;
+	} else {
+	    bptr += i;
+	    len -= i;
+	}
+    }
+
+    return len;
 }
 
 
