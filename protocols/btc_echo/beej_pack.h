@@ -6,6 +6,6 @@
 #define BEEJ_PACK_H__
 
 unsigned int beej_pack(unsigned char *buf, char *format, ...);
-void beej_unpack(unsigned char *buf, char *format, ...);
+void beej_unpack(const unsigned char *buf, char *format, ...);
 
 #endif

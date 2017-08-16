@@ -32,11 +32,6 @@ int main(void)
 
     kyk_send_btc_msg_buf("localhost", "8333", &msg_buf, &resp_buf);
     
-    resp_msg = unpack_resp_buf(&resp_buf);
-    pack_btc_message(&resp_msg_buf, resp_msg);
-
-    printf("=======> Request Buf:\n");
-    print_msg_buf(&msg_buf);
-    printf("=======> Response Buf:\n");
-    print_msg_buf(&resp_msg_buf);
+    printf("=======> Response Body:\n");
+    printf("%s\n", resp_buf.body);
 }

@@ -24,24 +24,24 @@ static void packi32(unsigned char *buf, unsigned long int i, const unsigned char
 static void packi32_little(unsigned char *buf, unsigned long int i);
 static void packi64(unsigned char *buf, unsigned long long int i, const unsigned char bytodr);
 static void packi64_little(unsigned char *buf, unsigned long long int i);
-static int unpacki16(unsigned char *buf, const unsigned char bytodr);
-static int unpacki16_big(unsigned char *buf);
-static int unpacki16_little(unsigned char *buf);
-static unsigned int unpacku16(unsigned char *buf, const unsigned char bytodr);
-static unsigned int unpacku16_big(unsigned char *buf);
-static unsigned int unpacku16_little(unsigned char *buf);
-static long int unpacki32(unsigned char *buf, const unsigned char bytodr);
-static long int unpacki32_big(unsigned char *buf);
-static long int unpacki32_little(unsigned char *buf);
-static unsigned long int unpacku32(unsigned char *buf, const unsigned char bytodr);
-static unsigned long int unpacku32_big(unsigned char *buf);
-static unsigned long int unpacku32_little(unsigned char *buf);
-static long long int unpacki64(unsigned char *buf, const unsigned char bytodr);
-static unsigned long long int unpacku64(unsigned char *buf, const unsigned char bytodr);
-static long long int unpacki64_little(unsigned char *buf);
-static long long int unpacki64_big(unsigned char *buf);
-static long long int unpacku64_little(unsigned char *buf);
-static long long int unpacku64_big(unsigned char *buf);
+static int unpacki16(const unsigned char *buf, const unsigned char bytodr);
+static int unpacki16_big(const unsigned char *buf);
+static int unpacki16_little(const unsigned char *buf);
+static unsigned int unpacku16(const unsigned char *buf, const unsigned char bytodr);
+static unsigned int unpacku16_big(const unsigned char *buf);
+static unsigned int unpacku16_little(const unsigned char *buf);
+static long int unpacki32(const unsigned char *buf, const unsigned char bytodr);
+static long int unpacki32_big(const unsigned char *buf);
+static long int unpacki32_little(const unsigned char *buf);
+static unsigned long int unpacku32(const unsigned char *buf, const unsigned char bytodr);
+static unsigned long int unpacku32_big(const unsigned char *buf);
+static unsigned long int unpacku32_little(const unsigned char *buf);
+static long long int unpacki64(const unsigned char *buf, const unsigned char bytodr);
+static unsigned long long int unpacku64(const unsigned char *buf, const unsigned char bytodr);
+static long long int unpacki64_little(const unsigned char *buf);
+static long long int unpacki64_big(const unsigned char *buf);
+static long long int unpacku64_little(const unsigned char *buf);
+static long long int unpacku64_big(const unsigned char *buf);
 
 uint64_t pack754(long double f, unsigned bits, unsigned expbits)
 {
@@ -169,7 +169,7 @@ void packi64_little(unsigned char *buf, unsigned long long int i)
 /*
 ** unpacki16() -- unpack a 16-bit int from a char buffer (like ntohs())
 */ 
-int unpacki16(unsigned char *buf, const unsigned char bytodr)
+int unpacki16(const unsigned char *buf, const unsigned char bytodr)
 {
     int i;
 
@@ -183,7 +183,7 @@ int unpacki16(unsigned char *buf, const unsigned char bytodr)
 }
 
 
-int unpacki16_big(unsigned char *buf)
+int unpacki16_big(const unsigned char *buf)
 {
     unsigned int i2 = ((unsigned int)buf[0]<<8) | buf[1];
     int i;
@@ -195,7 +195,7 @@ int unpacki16_big(unsigned char *buf)
     return i;
 }
 
-int unpacki16_little(unsigned char *buf)
+int unpacki16_little(const unsigned char *buf)
 {
     unsigned int i2 = ((unsigned int)buf[1]<<8) | buf[0];
     int i;
@@ -211,7 +211,7 @@ int unpacki16_little(unsigned char *buf)
 /*
 ** unpacku16() -- unpack a 16-bit unsigned from a char buffer (like ntohs())
 */ 
-unsigned int unpacku16(unsigned char *buf, const unsigned char bytodr)
+unsigned int unpacku16(const unsigned char *buf, const unsigned char bytodr)
 {
     unsigned int i;
     if(bytodr == '<'){
@@ -223,12 +223,12 @@ unsigned int unpacku16(unsigned char *buf, const unsigned char bytodr)
     return i;
 }
 
-unsigned int unpacku16_big(unsigned char *buf)
+unsigned int unpacku16_big(const unsigned char *buf)
 {
     return ((unsigned int)buf[0]<<8) | buf[1];
 }
 
-unsigned int unpacku16_little(unsigned char *buf)
+unsigned int unpacku16_little(const unsigned char *buf)
 {
     return ((unsigned int)buf[1]<<8) | buf[0];
 }
@@ -236,7 +236,7 @@ unsigned int unpacku16_little(unsigned char *buf)
 /*
 ** unpacki32() -- unpack a 32-bit int from a char buffer (like ntohl())
 */ 
-long int unpacki32(unsigned char *buf, const unsigned char bytodr)
+long int unpacki32(const unsigned char *buf, const unsigned char bytodr)
 {
     long int i;
 
@@ -249,7 +249,7 @@ long int unpacki32(unsigned char *buf, const unsigned char bytodr)
     return i;
 }
 
-long int unpacki32_big(unsigned char *buf)
+long int unpacki32_big(const unsigned char *buf)
 {
     unsigned long int i2 = ((unsigned long int)buf[0]<<24) |
                            ((unsigned long int)buf[1]<<16) |
@@ -264,7 +264,7 @@ long int unpacki32_big(unsigned char *buf)
     return i;
 }
 
-long int unpacki32_little(unsigned char *buf)
+long int unpacki32_little(const unsigned char *buf)
 {
     unsigned long int i2 = ((unsigned long int)buf[3]<<24) |
                            ((unsigned long int)buf[2]<<16) |
@@ -283,7 +283,7 @@ long int unpacki32_little(unsigned char *buf)
 /*
 ** unpacku32() -- unpack a 32-bit unsigned from a char buffer (like ntohl())
 */ 
-unsigned long int unpacku32(unsigned char *buf, const unsigned char bytodr)
+unsigned long int unpacku32(const unsigned char *buf, const unsigned char bytodr)
 {
     unsigned long int i;
 
@@ -297,7 +297,7 @@ unsigned long int unpacku32(unsigned char *buf, const unsigned char bytodr)
 }
 
 
-unsigned long int unpacku32_big(unsigned char *buf)
+unsigned long int unpacku32_big(const unsigned char *buf)
 {
     return ((unsigned long int)buf[0]<<24) |
            ((unsigned long int)buf[1]<<16) |
@@ -305,7 +305,7 @@ unsigned long int unpacku32_big(unsigned char *buf)
            buf[3];
 }
 
-unsigned long int unpacku32_little(unsigned char *buf)
+unsigned long int unpacku32_little(const unsigned char *buf)
 {
     return ((unsigned long int)buf[3]<<24) |
            ((unsigned long int)buf[2]<<16) |
@@ -316,7 +316,7 @@ unsigned long int unpacku32_little(unsigned char *buf)
 /*
 ** unpacki64() -- unpack a 64-bit int from a char buffer (like ntohl())
 */ 
-long long int unpacki64(unsigned char *buf, const unsigned char bytodr)
+long long int unpacki64(const unsigned char *buf, const unsigned char bytodr)
 {
     unsigned long long int i;
 
@@ -329,7 +329,7 @@ long long int unpacki64(unsigned char *buf, const unsigned char bytodr)
     return i;
 }
 
-long long int unpacki64_big(unsigned char *buf)
+long long int unpacki64_big(const unsigned char *buf)
 {
     unsigned long long int i2;
     long long int i;
@@ -355,7 +355,7 @@ long long int unpacki64_big(unsigned char *buf)
 }
 
 
-long long int unpacki64_little(unsigned char *buf)
+long long int unpacki64_little(const unsigned char *buf)
 {
     unsigned long long int i2 = ((unsigned long long int)buf[7]<<56) |
 	((unsigned long long int)buf[6]<<48) |
@@ -381,7 +381,7 @@ long long int unpacki64_little(unsigned char *buf)
 /*
 ** unpacku64() -- unpack a 64-bit unsigned from a char buffer (like ntohl())
 */ 
-unsigned long long int unpacku64(unsigned char *buf, const unsigned char bytodr)
+unsigned long long int unpacku64(const unsigned char *buf, const unsigned char bytodr)
 {
     unsigned long long int i;
     
@@ -394,7 +394,7 @@ unsigned long long int unpacku64(unsigned char *buf, const unsigned char bytodr)
     return i;
 }
 
-long long int unpacku64_little(unsigned char *buf)
+long long int unpacku64_little(const unsigned char *buf)
 {
     unsigned long long int i = ((unsigned long long int)buf[7]<<56) |
 	((unsigned long long int)buf[6]<<48) |
@@ -408,7 +408,7 @@ long long int unpacku64_little(unsigned char *buf)
     return i;
 }
 
-long long int unpacku64_big(unsigned char *buf)
+long long int unpacku64_big(const unsigned char *buf)
 {
     unsigned long long int i;
 
@@ -610,7 +610,7 @@ unsigned int beej_pack(unsigned char *buf, char *format, ...)
 **  (string is extracted based on its stored length, but 's' can be
 **  prepended with a max length)
 */
-void beej_unpack(unsigned char *buf, char *format, ...)
+void beej_unpack(const unsigned char *buf, char *format, ...)
 {
     va_list ap;
 

@@ -36,7 +36,8 @@ typedef struct protocol_message_payload {
 
 typedef struct protocol_btc_message_buf {
     uint32_t len;
-    unsigned char body[24+PL_BUF_SIZE];
+    size_t pld_len;
+    unsigned char body[PL_BUF_SIZE];
 } ptl_msg_buf;
 
 typedef struct protocol_btc_message{
@@ -76,5 +77,6 @@ ptl_msg * unpack_resp_buf(ptl_resp_buf *resp_buf);
 void print_msg_buf(const ptl_msg_buf *msg_buf);
 void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld);
 void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg);
+void format_msg_buf(char *str, const ptl_msg_buf *msg_buf);
 
 #endif

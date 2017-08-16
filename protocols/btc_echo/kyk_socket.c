@@ -6,10 +6,13 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "beej_pack.h"
 #include "btc_message.h"
 
 
 #define MAX_BUF_SIZE 1024
+
+static size_t read_pld_len(const unsigned char *buf, size_t inx);
 
 /* struct addrinfo { */
 /*     int              ai_flags; */
@@ -98,14 +101,61 @@ void kyk_send_btc_msg_buf(const char *node, const char *service, const ptl_msg_b
     }
 
     printf("Received %zd bytes: %s\n", nread, resp_body);
-    for(int i=0; i < nread; i++){
-	printf("%c", resp_body[i]);
-    }
+    /* for(int i=0; i < nread; i++){ */
+    /* 	printf("%c", resp_body[i]); */
+    /* } */
 
     memcpy(resp_buf -> body, resp_body, nread);
 
+
     printf("\n");
 
+}
+
+ssize_t kyk_recv_btc_msg(int sockfd, ptl_msg_buf *msg_buf, size_t buf_len)
+{
+    unsigned char *bptr = msg_buf -> body;
+    size_t recv_size = 0;
+    size_t pld_size = 0;
+    size_t msg_size = 24;
+    int pld_flag = 1;
+    
+    while(1){
+	ssize_t i = recv(sockfd, bptr, buf_len, 0);
+	if(i == -1){
+	    perror("recv");
+	    break;
+	}
+	recv_size += i;
+	bptr += i;
+	if(recv_size >= 20 && pld_flag == 1){
+	    pld_size = read_pld_len(msg_buf -> body, 16);
+	    pld_flag = 0;
+	}
+	if(recv_size >= pld_size + msg_size){
+	    break;
+	}
+
+    }
+
+    if(recv_size < pld_size + msg_size){
+	return -1;
+    } else {
+	msg_buf -> len = recv_size;
+	msg_buf -> pld_len = pld_size;
+	return recv_size;
+    }
+
+}
+
+static size_t read_pld_len(const unsigned char *buf, size_t inx)
+{
+    uint32_t len = 0;
+    
+    buf += inx;
+    beej_unpack(buf, "<L", &len);
+
+    return (size_t)len;
 }
 
 

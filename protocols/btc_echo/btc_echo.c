@@ -20,6 +20,7 @@
 
 #define PORT "8333"  // the port users will be connecting to
 #define BACKLOG 10	 // how many pending connections queue will hold
+#define MSG_SIZE 6000
 
 void sigchld_handler(int s);
 void *get_in_addr(struct sockaddr *sa);
@@ -34,6 +35,8 @@ int main(void)
     int yes=1;
     char s[INET6_ADDRSTRLEN];
     int rv;
+    ptl_msg_buf msg_buf;
+    char resp_msg[MSG_SIZE];
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
@@ -106,8 +109,18 @@ int main(void)
 
 	if (!fork()) { // this is the child process
 	    close(sockfd); // child doesn't need the listener
-	    if (send(new_fd, "Hello, world!", 13, 0) == -1)
-		perror("send");
+	    
+	    if (kyk_recv_btc_msg(new_fd, &msg_buf, PL_BUF_SIZE) == -1){
+		perror("recv");
+	    } else {
+		format_msg_buf(resp_msg, &msg_buf);
+		printf("%s\n", resp_msg);
+		if(send(new_fd, resp_msg, strlen(resp_msg), 0) == -1){
+		    perror("send");
+		}
+	    }
+	    /* if (send(new_fd, "Hello, world!", 13, 0) == -1) */
+	    /* 	perror("send"); */
 	    close(new_fd);
 	    exit(0);
 	}
@@ -116,23 +129,6 @@ int main(void)
 
     return 0;
 	
-}
-
-ssize_t recv_all(int sockfd, void *buf, size_t len, int flags)
-{
-    unsigned char *bptr = (unsigned char *) buf;
-    while(len > 0)
-    {
-	int i = recv(sockfd, bptr, len, flags);
-	if(i == -1){
-	    return -1;
-	} else {
-	    bptr += i;
-	    len -= i;
-	}
-    }
-
-    return len;
 }
 
 
