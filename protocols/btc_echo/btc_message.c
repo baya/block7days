@@ -164,4 +164,99 @@ void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg)
 }
 
 
+void encode_varstr(var_str *vstr, const char *src)
+{
+    size_t len;
 
+    len = strlen(src);
+    // encode_varint(&(vstr -> len), len);
+    vstr -> len = len;
+    vstr -> body = malloc(len * sizeof(char));
+    memcpy(vstr -> body, src, len * sizeof(char));
+}
+
+void pack_version(ptl_ver *ver, ptl_payload *pld)
+{
+    unsigned int size;
+    unsigned char *bufp = pld -> buf;
+    
+    size = beej_pack(bufp, "<l", ver -> vers);
+    pld -> len += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "<Q", ver -> servs);
+    pld -> len += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "<q", ver -> ttamp);
+    pld -> len += size;
+    bufp += size;
+
+    size = pack_ptl_net_addr(bufp, ver -> addr_recv_ptr);
+    pld -> len += size;
+    bufp += size;
+
+    size = pack_ptl_net_addr(bufp, ver -> addr_from_ptr);
+    pld -> len += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "<Q", ver -> nonce);
+    pld -> len += size;
+    bufp += size;
+
+    // size = pack_varint(bufp, ver -> ua_len);
+    size = beej_pack(bufp, "<H", 0);
+    pld -> len += size;
+    bufp += size;
+
+    size = pack_varstr(bufp, ver -> uagent);
+    pld -> len += size;
+    bufp += size;
+
+    size = beej_pack(bufp, "<l", ver -> start_height);
+    pld -> len += size;
+    bufp += size;
+
+    /* size = beej_pack(bufp, "C", ver -> relay); */
+    /* pld -> len += size; */
+    /* bufp += size; */
+
+}
+
+unsigned int pack_ptl_net_addr(unsigned char *bufp, ptl_net_addr *na)
+{
+    unsigned int size = 0;
+    unsigned int m_size = 0;
+
+    size = beej_pack(bufp, "<Q", na -> servs);
+    m_size += size;
+    bufp += size;
+
+    size = 16;
+    memcpy(bufp, na -> ipv, size);
+    m_size += size;
+    bufp += size;
+
+    size = beej_pack(bufp, ">H", na -> port);
+    m_size += size;
+    bufp += size;
+
+    return m_size;
+}
+
+unsigned int pack_varstr(unsigned char *bufp, var_str vstr)
+{
+    unsigned int size = 0;
+    unsigned int m_size = 0;
+
+    if(vstr.len > 0)
+    {
+	size = vstr.len * sizeof(char);
+	memcpy(bufp, vstr.body, size);
+	m_size += size;
+
+    }
+
+    return m_size;
+
+}

@@ -101,6 +101,7 @@ void kyk_send_btc_msg_buf(const char *node, const char *service, const ptl_msg_b
     }
 
     printf("Received %zd bytes\n", nread);
+    resp_buf -> len = nread;
     // printf("%s\n", resp_body);
     /* for(int i=0; i < nread; i++){ */
     /* 	printf("%c", resp_body[i]); */

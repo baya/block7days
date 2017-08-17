@@ -25,7 +25,7 @@ typedef struct varint {
 } varint;
 
 typedef struct var_length_string{
-    varint len;
+    int len;
     char *body;
 } var_str;
 
@@ -61,7 +61,7 @@ typedef struct protocol_btc_version{
     ptl_net_addr *addr_recv_ptr;
     ptl_net_addr *addr_from_ptr;
     uint64_t nonce;
-    varint ua_len;
+    uint8_t ua_len;
     var_str uagent;
     int32_t start_height;
     uint8_t relay;
@@ -69,6 +69,7 @@ typedef struct protocol_btc_version{
 } ptl_ver;
 
 typedef struct protocol_resp_buf{
+    size_t len;
     char cmdname[12];
     unsigned char body[PL_BUF_SIZE];
 } ptl_resp_buf;
@@ -78,5 +79,10 @@ void print_msg_buf(const ptl_msg_buf *msg_buf);
 void build_btc_message(ptl_msg * msg, const char *cmd, ptl_payload *pld);
 void pack_btc_message(ptl_msg_buf *msg_buf, ptl_msg *msg);
 void format_msg_buf(char *str, const ptl_msg_buf *msg_buf);
+void encode_varstr(var_str *, const char *);
+void pack_version(ptl_ver *, ptl_payload *);
+unsigned int pack_ptl_net_addr(unsigned char *, ptl_net_addr *);
+unsigned int pack_varstr(unsigned char *, var_str);
+
 
 #endif
