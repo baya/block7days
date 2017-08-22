@@ -5,5 +5,7 @@ int main()
 {
     f();
     printf("======>\n");
+    printf("%s\n", A);
+    printf("%s\n", B);
     // b();
 }
