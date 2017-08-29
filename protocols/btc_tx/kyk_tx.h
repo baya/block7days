@@ -14,9 +14,21 @@ struct kyk_tx {
 };
 
 struct kyk_txin{
+    unsigned char pre_txid[32];
+    uint32_t pre_tx_inx;
+    varint_t sc_size;
+    unsigned char *sc;
+    uint32_t seq_no;
 };
 
 struct kyk_txout{
+    uint64_t value;
+    varint_t sc_size;
+    unsigned char *sc;
+};
+
+struct kyk_tx_hash{
+    unsigned char body[32];
 };
 
 
