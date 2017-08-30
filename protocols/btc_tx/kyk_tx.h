@@ -27,9 +27,7 @@ struct kyk_txout{
     unsigned char *sc;
 };
 
-struct kyk_tx_hash{
-    unsigned char body[32];
-};
+void kyk_seri_tx(unsigned char *buf, struct kyk_tx *tx);
 
 
 #endif

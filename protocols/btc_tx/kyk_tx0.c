@@ -4,27 +4,57 @@
 #include <errno.h>
 #include <string.h>
 #include <time.h>
-#include <assert.h>
 
 #include "kyk_tx.h"
 
 int hexstr_to_bytes(const char *hexstr, unsigned char *buf, size_t len);
 
+struct kyk_txin *create_txin(const char *pre_txid,
+			     uint32_t pre_tx_inx,
+			     varint_t sc_size,
+			     const char *sc,
+			     uint32_t seq_no);
+
+struct kyk_txout *create_txout(uint64_t value,
+			       varint_t sc_size,
+			       const char *sc);
+
+void print_bytes_in_hex(const unsigned char *buf, size_t len);
+
+
 int main()
 {
     struct kyk_tx tx0;
-    struct kyk_txin txin;
+    char *pre_txid = "0000000000000000000000000000000000000000000000000000000000000000";
+    char *txin_sc = "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73";
+    char *txout_sc = "4104678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5fac";
+    
     tx0.version = 1;
     tx0.vin_sz = 1;
-    char *hstr = "0000000000000000000000000000000000000000000000000000000000000000";
-    // char *hstr = "0437cd7f8525ceed2324359c2d0ba26006d92d856a9c20fa0241106ee5a597c9";
-    if(hexstr_to_bytes(hstr, txin.pre_txid, 32) == -1){
-	fprintf(stderr, "failed in function hexstr_to_bytes()\n");
-	exit(1);
-    };
+    tx0.lock_time = 0;
 
-    for(int i=0; i < 32; i++){
-	printf("%02x", txin.pre_txid[i]);
+    tx0.txin = create_txin(pre_txid,
+		       4294967295,
+		       77,
+		       txin_sc,
+		       0xFFFFFFFF);
+
+    tx0.vout_sz = 1;
+    tx0.txout = create_txout(5000000000,
+			     67,
+			     txout_sc);
+    
+
+    print_bytes_in_hex(tx0.txin->pre_txid, 32);
+    print_bytes_in_hex(tx0.txin->sc, 77);
+    print_bytes_in_hex(tx0.txout->sc, 67);
+
+}
+
+void print_bytes_in_hex(const unsigned char *buf, size_t len)
+{
+    for(int i=0; i < len; i++){
+	printf("%02x", buf[i]);
     }
     printf("\n");
 }
@@ -34,8 +64,6 @@ int hexstr_to_bytes(const char *hexstr, unsigned char *buf, size_t len)
     size_t count = 0;
     size_t dst_len = len * 2;
     int ret;
-
-    // assert(strlen(hexstr) == dst_len);
 
     if(strlen(hexstr) != dst_len){
 	return -1;
@@ -51,4 +79,56 @@ int hexstr_to_bytes(const char *hexstr, unsigned char *buf, size_t len)
     }
 
     return 0;
+}
+
+struct kyk_txin *create_txin(const char *pre_txid,
+			     uint32_t pre_tx_inx,
+			     varint_t sc_size,
+			     const char *sc,
+			     uint32_t seq_no)
+{
+    struct kyk_txin *txin = malloc(sizeof(struct kyk_txin));
+    if(txin == NULL){
+	fprintf(stderr, "failed in malloc kyk_txin \n");
+	exit(1);
+    }
+
+    if(hexstr_to_bytes(pre_txid, txin->pre_txid, 32) == -1){
+	fprintf(stderr, "failed in setting pre_txid \n");
+	exit(1);
+    }
+
+    txin->pre_tx_inx = pre_tx_inx;
+    txin->sc_size = sc_size;
+    txin->sc = malloc(sc_size * sizeof(unsigned char));
+    if(hexstr_to_bytes(sc, txin->sc, sc_size) == -1){
+	fprintf(stderr, "failed in setting txin sc \n");
+	exit(1);
+    }
+
+    txin->seq_no = seq_no;
+
+    return txin;
+}
+
+struct kyk_txout *create_txout(uint64_t value,
+			       varint_t sc_size,
+			       const char *sc)
+{
+    struct kyk_txout *txout = malloc(sizeof(struct kyk_txout));
+    if(txout == NULL){
+	fprintf(stderr, "failed in malloc kyk_txout \n");
+	exit(1);
+    }
+
+    txout -> value = value;
+    txout -> sc_size = sc_size;
+    txout -> sc = malloc(sc_size * sizeof(unsigned char));
+    
+    if(hexstr_to_bytes(sc, txout->sc, sc_size) == -1){
+	fprintf(stderr, "failed in setting txout sc \n");
+	exit(1);
+    }
+
+    return txout;
 }
