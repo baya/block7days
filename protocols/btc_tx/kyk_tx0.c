@@ -7,6 +7,8 @@
 
 #include "kyk_tx.h"
 
+#define MAX_BUF_SIZE 10000
+
 int hexstr_to_bytes(const char *hexstr, unsigned char *buf, size_t len);
 
 struct kyk_txin *create_txin(const char *pre_txid,
@@ -24,6 +26,8 @@ void print_bytes_in_hex(const unsigned char *buf, size_t len);
 
 int main()
 {
+    unsigned char buf[MAX_BUF_SIZE];
+    size_t count;
     struct kyk_tx tx0;
     char *pre_txid = "0000000000000000000000000000000000000000000000000000000000000000";
     char *txin_sc = "04ffff001d0104455468652054696d65732030332f4a616e2f32303039204368616e63656c6c6f72206f6e206272696e6b206f66207365636f6e64206261696c6f757420666f722062616e6b73";
@@ -43,11 +47,15 @@ int main()
     tx0.txout = create_txout(5000000000,
 			     67,
 			     txout_sc);
-    
 
-    print_bytes_in_hex(tx0.txin->pre_txid, 32);
-    print_bytes_in_hex(tx0.txin->sc, 77);
-    print_bytes_in_hex(tx0.txout->sc, 67);
+    count = kyk_seri_tx(buf, &tx0);
+    print_bytes_in_hex(buf, count);
+
+    /* print_bytes_in_hex(tx0.txin->pre_txid, 32); */
+    /* print_bytes_in_hex(tx0.txin->sc, 77); */
+    /* print_bytes_in_hex(tx0.txout->sc, 67); */
+
+    
 
 }
 

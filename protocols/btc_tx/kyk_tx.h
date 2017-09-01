@@ -27,7 +27,6 @@ struct kyk_txout{
     unsigned char *sc;
 };
 
-void kyk_seri_tx(unsigned char *buf, struct kyk_tx *tx);
-
+size_t kyk_seri_tx(unsigned char *buf, struct kyk_tx *tx);
 
 #endif
