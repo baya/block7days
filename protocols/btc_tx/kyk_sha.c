@@ -4,6 +4,8 @@
 #include <openssl/sha.h>
 #include "kyk_sha.h"
 
+static void print_bytes_in_hex(const unsigned char *buf, size_t len);
+
 unsigned char * kyk_sha256(const char *str, size_t len)
 {
     unsigned char *dgst;
@@ -33,9 +35,42 @@ unsigned char * kyk_dble_sha256(const char *str, size_t len)
 }
 
 
+/* inverted hash*/
+struct kyk_ivhash *kyk_inver_hash(const char *src, size_t len)
+{
+    unsigned char *dg;
+    struct kyk_ivhash *ivhash;
+    size_t dg_len = SHA256_DIGEST_LENGTH;
+
+    dg = kyk_dble_sha256(src, len);
+    ivhash = (struct kyk_ivhash*) malloc(sizeof(struct kyk_ivhash));
+    ivhash -> len = dg_len;
+    ivhash -> body = (unsigned char*)malloc(dg_len * sizeof(unsigned char));
+    
+    if(ivhash -> body == NULL){
+	fprintf(stderr, "failed in malloc kyk inver hash\n");
+	exit(1);
+    }
+
+    for(int i=dg_len -1; i >= 0; i--){
+	ivhash->body[dg_len - 1 - i] = dg[i];
+    }
+
+
+    free(dg);
+
+    return ivhash;
+}
 
 
 
+void print_bytes_in_hex(const unsigned char *buf, size_t len)
+{
+    for(int i=0; i < len; i++){
+	printf("%02x", buf[i]);
+    }
+    printf("\n");
+}
 
 
 

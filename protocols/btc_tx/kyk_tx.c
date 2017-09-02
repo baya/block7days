@@ -6,6 +6,7 @@
 #include "varint.h"
 #include "beej_pack.h"
 
+
 static size_t kyk_seri_txin(unsigned char *buf, struct kyk_txin *txin);
 static size_t reverse_pack_chars(unsigned char *buf, unsigned char *src, size_t count);
 static size_t kyk_seri_txin_list(unsigned char *buf, struct kyk_txin *txin, size_t count);
