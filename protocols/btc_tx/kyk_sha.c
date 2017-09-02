@@ -36,14 +36,14 @@ unsigned char * kyk_dble_sha256(const char *str, size_t len)
 
 
 /* inverted hash*/
-struct kyk_ivhash *kyk_inver_hash(const char *src, size_t len)
+struct kyk_hash *kyk_inver_hash(const char *src, size_t len)
 {
     unsigned char *dg;
-    struct kyk_ivhash *ivhash;
+    struct kyk_hash *ivhash;
     size_t dg_len = SHA256_DIGEST_LENGTH;
 
     dg = kyk_dble_sha256(src, len);
-    ivhash = (struct kyk_ivhash*) malloc(sizeof(struct kyk_ivhash));
+    ivhash = (struct kyk_hash*) malloc(sizeof(struct kyk_hash));
     ivhash -> len = dg_len;
     ivhash -> body = (unsigned char*)malloc(dg_len * sizeof(unsigned char));
     
