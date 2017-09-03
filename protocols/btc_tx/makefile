@@ -1,10 +1,10 @@
-objs = kyk_tx0.o varint.o kyk_tx.o beej_pack.o kyk_sha.o
+kyk_tx0_objs = kyk_tx0.o varint.o kyk_tx.o beej_pack.o kyk_sha.o
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 
 
-kyk_tx0: $(objs)
-	cc -o kyk_tx0.out $(objs) -L$(l_paths) -lcrypto
+kyk_tx0: $(kyk_tx0_objs)
+	cc -o kyk_tx0.out $(kyk_tx0_objs) -L$(l_paths) -lcrypto
 
 kyk_tx0.o: kyk_tx.h
 varint.o: varint.h
@@ -14,4 +14,4 @@ kyk_sha.o: kyk_sha.c kyk_sha.h
 	cc -c kyk_sha.c -I$(i_paths)
 
 clean:
-	-rm -f kyk_tx0.out $(objs)
+	-rm -f kyk_tx0.out $(kyk_tx0_objs)

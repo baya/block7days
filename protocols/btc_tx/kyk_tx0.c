@@ -52,10 +52,10 @@ int main()
 			     txout_sc);
 
     count = kyk_seri_tx(buf, &tx0);
+    printf("====>hex: ");
     print_bytes_in_hex(buf, count);
-    //txid = kyk_dble_sha256((char *)buf, count);
+    
     txid = kyk_inver_hash((char *)buf, count);
-
     printf("====>hash: ");
     print_bytes_in_hex(txid -> body, txid -> len);
     printf("\n");
