@@ -5,6 +5,7 @@
 
 #include "kyk_ecdsa.h"
 #include "kyk_utils.h"
+#include "kyk_sha.h"
 
 int main()
 {
@@ -24,6 +25,7 @@ int main()
     point_conversion_form_t conv_form = POINT_CONVERSION_UNCOMPRESSED;
     size_t pub_len;
     uint8_t *pub, *pub_copy;
+    uint8_t *sha_pub;
 
 
     key = kyk_ec_new_keypair(priv_bytes);
@@ -38,7 +40,7 @@ int main()
         return -1;
     }
     BN_bn2bin(priv_bn, priv);
-    kyk_print_hex("0 - Having a private ECDSA key        ", priv, sizeof(priv));
+    kyk_print_hex("0 - Having a private ECDSA key                ", priv, sizeof(priv));
 
 
     BN_bn2bin(priv_bn, priv);
@@ -60,11 +62,17 @@ int main()
 	fprintf(stderr, "Unable to decode public key\n");
 	return -1;
     }
+    kyk_print_hex("1 - Take the corresponding public key         ", pub, pub_len);
 
-    kyk_print_hex("1 - Take the corresponding public key ", pub, pub_len);
 
+    /*
+     * 2 - Perform SHA-256 hashing on the public key
+     */
+    sha_pub = kyk_sha256((char *)pub, pub_len);
+    kyk_print_hex("2 - Perform SHA-256 hashing on the public key ", sha_pub, SHA256_DIGEST_LENGTH);
 
     EC_KEY_free(key);
+    free(sha_pub);
     
     return 0;
 }

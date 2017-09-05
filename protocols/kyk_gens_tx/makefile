@@ -1,6 +1,6 @@
 kyk_tx0_objs = kyk_tx0.o varint.o kyk_tx.o beej_pack.o kyk_sha.o
 ec_test_objs = kyk_ecdsa_test.o kyk_ecdsa.o kyk_utils.o
-addr_test_objs = kyk_address_test.o kyk_ecdsa.o kyk_utils.o
+addr_test_objs = kyk_address_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 

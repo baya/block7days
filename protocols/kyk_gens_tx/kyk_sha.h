@@ -1,6 +1,8 @@
 #ifndef KYK_SHA_H__
 #define KYK_SHA_H__
 
+#include <openssl/sha.h>
+
 struct kyk_hash{
     size_t len;
     unsigned char *body;
