@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
 #include "kyk_sha.h"
 
 unsigned char * kyk_sha256(const char *str, size_t len)

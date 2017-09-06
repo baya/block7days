@@ -1,7 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <openssl/bn.h>
-
 #include "kyk_base58.h"
 #include "kyk_sha.h"
 #include "kyk_utils.h"
