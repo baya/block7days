@@ -8,7 +8,10 @@ void kyk_print_hex(const char *label, const uint8_t *v, size_t len)
 {
     size_t i;
 
-    printf("%s: ", label);
+    if(strlen(label) > 0){
+	printf("%s: ", label);
+    }
+    
     for (i = 0; i < len; ++i) {
         printf("%02x", v[i]);
     }
@@ -56,4 +59,17 @@ uint8_t *kyk_alloc_hex(const char *str, size_t *len)
     *len = count;
 
     return v;
+}
+
+void kyk_reverse(uint8_t *dst, size_t len)
+{
+    size_t i;
+    const size_t stop = len >> 1;
+    for (i = 0; i < stop; ++i) {
+        uint8_t *left = dst + i;
+        uint8_t *right = dst + len - i - 1;
+        const uint8_t tmp = *left;
+        *left = *right;
+        *right = tmp;
+    }
 }

@@ -1,6 +1,6 @@
 kyk_tx0_objs = kyk_tx0.o varint.o kyk_tx.o beej_pack.o kyk_sha.o
 ec_test_objs = kyk_ecdsa_test.o kyk_ecdsa.o kyk_utils.o
-addr_test_objs = kyk_address_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o
+addr_test_objs = kyk_address_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 
@@ -29,6 +29,8 @@ kyk_sha.o: kyk_sha.c kyk_sha.h
 	cc -c kyk_sha.c -I$(i_paths)
 kyk_ecdsa.o: kyk_ecdsa.c kyk_ecdsa.h
 	cc -c kyk_ecdsa.c -I$(i_paths)
+kyk_base58.o: kyk_base58.c kyk_base58.h
+	cc -c kyk_base58.c -I$(i_paths)
 
 clean:
 	-rm -f *.out *.o

@@ -32,6 +32,14 @@ unsigned char * kyk_dble_sha256(const char *str, size_t len)
     return dg2;
 }
 
+void kyk_dgst_rmd160(uint8_t *digest, const uint8_t *message, size_t len)
+{
+    RIPEMD160_CTX ctx;
+    RIPEMD160_Init(&ctx);
+    RIPEMD160_Update(&ctx, message, len);
+    RIPEMD160_Final(digest, &ctx);
+}
+
 
 /* inverted hash*/
 struct kyk_hash *kyk_inver_hash(const char *src, size_t len)
@@ -58,6 +66,28 @@ struct kyk_hash *kyk_inver_hash(const char *src, size_t len)
     free(dg);
 
     return ivhash;
+}
+
+void kyk_dgst_sha256(uint8_t *digest, const uint8_t *message, size_t len)
+{
+    SHA256_CTX ctx;
+    SHA256_Init(&ctx);
+    SHA256_Update(&ctx, message, len);
+    SHA256_Final(digest, &ctx);
+}
+
+void kyk_dgst_hash256(uint8_t *digest, const uint8_t *message, size_t len)
+{
+    uint8_t tmp[SHA256_DIGEST_LENGTH];
+    kyk_dgst_sha256(tmp, message, len);
+    kyk_dgst_sha256(digest, tmp, SHA256_DIGEST_LENGTH);
+}
+
+void kyk_dgst_hash160(uint8_t *digest, const uint8_t *message, size_t len)
+{
+    uint8_t tmp[SHA256_DIGEST_LENGTH];
+    kyk_dgst_sha256(tmp, message, len);
+    kyk_dgst_rmd160(digest, tmp, SHA256_DIGEST_LENGTH);
 }
 
 
