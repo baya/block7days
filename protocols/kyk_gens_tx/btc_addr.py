@@ -15,10 +15,8 @@ def base58_encode(version, public_address):
     version = bytearray.fromhex(version)
     checksum = hashlib.sha256(hashlib.sha256(version + public_address).digest()).digest()[:4]
     payload = version + public_address + checksum
-    
-    # result = int.from_bytes(payload, byteorder="big")
-    result = struct.unpack('>16B', payload[:16])[0]
-    # count the leading 0s
+
+    result = int.from_bytes(payload, byteorder="big")
     padding = len(payload) - len(payload.lstrip(b'\0'))
     encoded = []
 
@@ -47,7 +45,7 @@ def get_public_address(public_key):
     return address
 
 if __name__ == "__main__":
-    private_key = get_private_key("FEEDB0BDEADBEEF") 
+    private_key = get_private_key("6c85f3945141a6c43793565a17c3c469c4cb078a17352c227abbc858951aa0f2")
     public_key = get_public_key(private_key)
     public_address = get_public_address(public_key)
     bitcoin_address = base58_encode("00", public_address)
