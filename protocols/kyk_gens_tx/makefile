@@ -2,6 +2,7 @@ kyk_tx0_objs = kyk_tx0.o varint.o kyk_tx.o beej_pack.o kyk_sha.o
 ec_test_objs = kyk_ecdsa_test.o kyk_ecdsa.o kyk_utils.o
 addr_test_objs = kyk_address_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o
 make_addr_objs = kyk_make_address_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o kyk_address.o
+pem_to_addr_objs = pem_to_address.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o kyk_address.o
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 
@@ -18,6 +19,9 @@ kyk_address_test: $(addr_test_objs)
 kyk_make_address_test: $(make_addr_objs)
 	cc -Wall -o kyk_make_address_test.out $(make_addr_objs) -L$(l_paths) -lcrypto
 
+pem_to_address: $(pem_to_addr_objs)
+	cc -Wall -o pem_to_address.out $(pem_to_addr_objs) -L$(l_paths) -lcrypto
+
 
 kyk_tx0.o: kyk_tx.h
 kyk_ecdsa_test.o: kyk_ecdsa_test.c kyk_ecdsa.h
@@ -28,6 +32,9 @@ kyk_address_test.o: kyk_address_test.c kyk_ecdsa.h kyk_utils.h
 
 kyk_make_address_test.o: kyk_make_address_test.c
 	cc -c kyk_make_address_test.c -I$(i_paths)
+
+pem_to_address.o: pem_to_address.c
+	cc -c pem_to_address.c -I$(i_paths)
 
 
 varint.o: varint.h
