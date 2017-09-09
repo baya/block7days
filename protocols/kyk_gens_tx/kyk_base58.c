@@ -113,6 +113,32 @@ int raw_decode_base58(BIGNUM *bn, const char *src, size_t len)
 
 }
 
+
+void base58_get_checksum(uint8_t csum[4], const uint8_t *buf, size_t buflen)
+{
+    //struct protocol_double_sha sha_result;
+    uint8_t digst[32];
+
+    /* Form checksum, using double SHA2 (as per bitcoin standard) */
+    kyk_dgst_hash256(digst, buf, buflen);
+
+    /* Use first four bytes of that as the checksum. */
+    memcpy(csum, digst, 4);
+}
+
+int validate_base58_checksum(const uint8_t *buf, size_t buflen)
+{
+    uint8_t csum[4];
+
+    base58_get_checksum(csum, buf, buflen);
+    if (memcmp(csum, buf + 1 + RIPEMD160_DIGEST_LENGTH, sizeof(csum)) != 0){
+	return -1;
+    }
+
+    return 1;
+    
+}
+
 static int decode_char(char c, const char *enc)
 {
     const char *pos = strchr(enc, c);
