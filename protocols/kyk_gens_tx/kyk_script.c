@@ -10,6 +10,11 @@
 
 static size_t build_p2pkh_sc_pubk(unsigned char *buf, const unsigned char *pkh, size_t pkh_len);
 static int pubk_hash_from_address(unsigned char *pubk_hash, size_t pkh_len, const char *addr);
+static int is_sc_na_const(uint8_t opcode);
+static void init_sc_stack(struct kyk_sc_stack *stk);
+static void kyk_sc_stack_push(struct kyk_sc_stack *stk, uint8_t *sc, size_t len);
+static int is_sc_na_const(uint8_t opcode);
+static void kyk_sc_op_dup(struct kyk_sc_stack *stk);
 
 size_t p2pkh_sc_from_address(unsigned char *sc, const char *addr)
 {
@@ -85,5 +90,109 @@ size_t build_p2pkh_sc_pubk(unsigned char *sc, const unsigned char *pkh, size_t p
 
     return count;
 }
+
+
+size_t kyk_combine_sc(uint8_t *sc,
+		    uint8_t *sc_sig, size_t sc_sig_len,
+		    uint8_t *sc_pubk, size_t sc_pubk_len)
+{
+    size_t count = 0;
+    
+    for(int i=0; i < sc_sig_len; i++){
+	*sc = sc_sig[i];
+	sc++;
+	count++;
+    }
+
+    for(int i=0; i < sc_pubk_len; i++){
+	*sc = sc_pubk[i];
+	sc++;
+	count++;
+    }
+
+    return count;
+}
+
+int kyk_run_sc(uint8_t *sc, size_t sc_len)
+{
+    struct kyk_sc_stack stk;
+    uint8_t opcode;
+    size_t count = 0;
+    int ret_code = 1;
+
+    init_sc_stack(&stk);
+
+    while(count < sc_len){
+	opcode = *sc;
+	if(is_sc_na_const(opcode) == 1){
+	    sc++;
+	    count += 1;
+	    kyk_sc_stack_push(&stk, sc, opcode);
+	    sc += opcode;
+	    count += opcode;
+	} else {
+	    printf("???????OP_DUP:%d\n", OP_DUP);
+	    printf("+++++++++%d\n", opcode);
+	    switch (opcode){
+	    case OP_DUP:
+		sc++;
+		count += 1;
+		kyk_print_hex("Script Stack ", stk.buf, stk.op_end - stk.buf);
+		kyk_sc_op_dup(&stk);
+		return ret_code;
+		break;
+	    default:		
+	        fprintf(stderr, "Invalid Op Code: %d\n", opcode);
+		ret_code = 0;
+		break;
+	    }
+	}
+    }
+
+    
+
+    return ret_code;
+    
+}
+
+void init_sc_stack(struct kyk_sc_stack *stk)
+{
+    stk -> op_start = stk -> op_end = stk -> buf;
+}
+
+void kyk_sc_op_dup(struct kyk_sc_stack *stk)
+{
+    uint8_t *dup = stk -> op_start;
+    uint8_t *dup_end = stk -> op_end;
+    
+    while(dup < stk -> op_end){
+	dup_end++;
+	*dup_end = *dup;
+	dup++;
+    }
+
+    stk -> op_start = dup;
+    stk -> op_end = dup_end;
+
+}
+
+
+void kyk_sc_stack_push(struct kyk_sc_stack *stk, uint8_t *sc, size_t len)
+{
+    stk -> op_start = stk -> op_end;
+    memcpy(stk -> op_start, sc, len);
+    stk -> op_end += len;
+}
+
+int is_sc_na_const(uint8_t opcode)
+{
+  if(opcode >= OP_PUSHDATA0_START && opcode <= OP_PUSHDATA0_END){
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+
 
 

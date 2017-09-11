@@ -140,7 +140,20 @@
 
 #define NO_FOUND_OPTCODE "NO_FOUND_OPTCODE"
 
+#define  KYK_SC_STACK_BUF_SIZE 2000
+
+struct kyk_sc_stack {
+    uint8_t *op_start;
+    uint8_t *op_end;
+    uint8_t buf[KYK_SC_STACK_BUF_SIZE];
+};
+
 
 size_t p2pkh_sc_from_address(unsigned char *sc, const char *addr);
+size_t kyk_combine_sc(uint8_t *sc,
+		      uint8_t *sc_sig, size_t sc_sig_len,
+		      uint8_t *sc_pubk, size_t sc_pubk_len);
+
+int kyk_run_sc(uint8_t *sc, size_t sc_len);
 
 #endif

@@ -7,6 +7,8 @@ static void set_chksum_byte(uint8_t *dgst8,
 		     uint8_t *dgst7, size_t len1,
 		     uint8_t *dgst4, size_t len2);
 
+
+
 static uint8_t MAIN_NW = 0x00;
 
 char *kyk_make_address(const uint8_t *priv_bytes)
@@ -135,3 +137,4 @@ void set_chksum_byte(uint8_t *dgst8,
 
     
 }
+
