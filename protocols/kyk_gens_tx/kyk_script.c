@@ -131,16 +131,16 @@ int kyk_run_sc(uint8_t *sc, size_t sc_len)
 	    sc += opcode;
 	    count += opcode;
 	} else {
-	    printf("???????OP_DUP:%d\n", OP_DUP);
-	    printf("+++++++++%d\n", opcode);
 	    switch (opcode){
 	    case OP_DUP:
 		sc++;
 		count += 1;
-		kyk_print_hex("Script Stack ", stk.buf, stk.op_end - stk.buf);
 		kyk_sc_op_dup(&stk);
-		return ret_code;
 		break;
+	    case OP_HASH160:
+		sc++;
+		count += 1;
+		kyk_sc_op_hash160(&stk);
 	    default:		
 	        fprintf(stderr, "Invalid Op Code: %d\n", opcode);
 		ret_code = 0;
@@ -160,14 +160,18 @@ void init_sc_stack(struct kyk_sc_stack *stk)
     stk -> op_start = stk -> op_end = stk -> buf;
 }
 
+void kyk_sc_op_hash160(struct kyk_sc_stack *stk)
+{
+}
+
 void kyk_sc_op_dup(struct kyk_sc_stack *stk)
 {
     uint8_t *dup = stk -> op_start;
     uint8_t *dup_end = stk -> op_end;
     
     while(dup < stk -> op_end){
-	dup_end++;
 	*dup_end = *dup;
+	dup_end++;
 	dup++;
     }
 
