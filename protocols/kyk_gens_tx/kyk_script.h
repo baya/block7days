@@ -140,12 +140,17 @@
 
 #define NO_FOUND_OPTCODE "NO_FOUND_OPTCODE"
 
-#define  KYK_SC_STACK_BUF_SIZE 2000
+#define  KYK_SC_STACK_BUF_SIZE 20
+
+struct kyk_sc_stk_item {
+    size_t len;
+    uint8_t *val;
+};
 
 struct kyk_sc_stack {
-    uint8_t *op_start;
-    uint8_t *op_end;
-    uint8_t buf[KYK_SC_STACK_BUF_SIZE];
+    size_t hgt;
+    struct kyk_sc_stk_item *top;
+    struct kyk_sc_stk_item buf[KYK_SC_STACK_BUF_SIZE];
 };
 
 

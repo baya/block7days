@@ -15,6 +15,8 @@ static void init_sc_stack(struct kyk_sc_stack *stk);
 static void kyk_sc_stack_push(struct kyk_sc_stack *stk, uint8_t *sc, size_t len);
 static int is_sc_na_const(uint8_t opcode);
 static void kyk_sc_op_dup(struct kyk_sc_stack *stk);
+static void kyk_sc_op_hash160(struct kyk_sc_stack *stk);
+static struct kyk_sc_stk_item * kyk_sc_pop_stack(struct kyk_sc_stack *stk);
 
 size_t p2pkh_sc_from_address(unsigned char *sc, const char *addr)
 {
@@ -141,6 +143,10 @@ int kyk_run_sc(uint8_t *sc, size_t sc_len)
 		sc++;
 		count += 1;
 		kyk_sc_op_hash160(&stk);
+		for(int i=0; i < stk.hgt; i++){
+		    kyk_print_hex("", stk.buf[i].val, stk.buf[i].len);
+		}		
+		return ret_code;
 	    default:		
 	        fprintf(stderr, "Invalid Op Code: %d\n", opcode);
 		ret_code = 0;
@@ -150,42 +156,65 @@ int kyk_run_sc(uint8_t *sc, size_t sc_len)
     }
 
     
-
     return ret_code;
     
 }
 
 void init_sc_stack(struct kyk_sc_stack *stk)
 {
-    stk -> op_start = stk -> op_end = stk -> buf;
+    stk -> hgt = 0;
+    stk -> top = NULL;
 }
 
 void kyk_sc_op_hash160(struct kyk_sc_stack *stk)
 {
+    struct kyk_sc_stk_item *item = kyk_sc_pop_stack(stk);
+
+    struct kyk_sc_stk_item new_item;
+
+    new_item.len = 1;
+    new_item.val = malloc(sizeof(uint8_t));
+    new_item.val[0] = 0x77;
+
+    kyk_sc_stack_push(stk, new_item.val, new_item.len);
+}
+
+struct kyk_sc_stk_item * kyk_sc_pop_stack(struct kyk_sc_stack *stk)
+{
+    struct kyk_sc_stk_item *item;
+
+    item = stk -> top;
+    stk -> top--;
+    stk -> hgt --;
+
+    return item;
 }
 
 void kyk_sc_op_dup(struct kyk_sc_stack *stk)
 {
-    uint8_t *dup = stk -> op_start;
-    uint8_t *dup_end = stk -> op_end;
-    
-    while(dup < stk -> op_end){
-	*dup_end = *dup;
-	dup_end++;
-	dup++;
-    }
+    struct kyk_sc_stk_item *item;
 
-    stk -> op_start = dup;
-    stk -> op_end = dup_end;
-
+    item = stk -> top;
+    kyk_sc_stack_push(stk, item -> val, item -> len);
 }
 
 
 void kyk_sc_stack_push(struct kyk_sc_stack *stk, uint8_t *sc, size_t len)
 {
-    stk -> op_start = stk -> op_end;
-    memcpy(stk -> op_start, sc, len);
-    stk -> op_end += len;
+    struct kyk_sc_stk_item *item;
+    if(stk -> top == NULL){
+	stk -> top = stk -> buf;
+    } else {
+	stk -> top++;
+    }
+
+    item = stk -> top;
+    item -> len = len;
+    item -> val = malloc(len * sizeof(uint8_t));
+    memcpy(item -> val, sc, len);
+
+    stk -> hgt++;
+
 }
 
 int is_sc_na_const(uint8_t opcode)
@@ -195,6 +224,10 @@ int is_sc_na_const(uint8_t opcode)
   } else {
     return 0;
   }
+}
+
+void free_sc_stack(struct kyk_sc_stack *stk)
+{
 }
 
 
