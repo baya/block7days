@@ -7,16 +7,26 @@
 #include "kyk_base58.h"
 #include "kyk_script.h"
 #include "kyk_utils.h"
+#include "kyk_sha.h"
 
 static size_t build_p2pkh_sc_pubk(unsigned char *buf, const unsigned char *pkh, size_t pkh_len);
 static int pubk_hash_from_address(unsigned char *pubk_hash, size_t pkh_len, const char *addr);
 static int is_sc_na_const(uint8_t opcode);
 static void init_sc_stack(struct kyk_sc_stack *stk);
-static void kyk_sc_stack_push(struct kyk_sc_stack *stk, uint8_t *sc, size_t len);
 static int is_sc_na_const(uint8_t opcode);
 static void kyk_sc_op_dup(struct kyk_sc_stack *stk);
 static void kyk_sc_op_hash160(struct kyk_sc_stack *stk);
 static struct kyk_sc_stk_item * kyk_sc_pop_stack(struct kyk_sc_stack *stk);
+static void free_sc_stk_item(struct kyk_sc_stk_item *item);
+static void kyk_sc_stack_push(struct kyk_sc_stack *stk, uint8_t *sc, size_t len);
+static int kyk_sc_op_eq_verify(struct kyk_sc_stack *stk);
+static int kyk_sc_op_eq(struct kyk_sc_stack *stk);
+static int kyk_sc_op_checksig(struct kyk_sc_stack *stk);
+static int kyk_sc_cmpitem(const struct kyk_sc_stk_item *item1,
+			  const struct kyk_sc_stk_item *item2);
+static void free_sc_stack(struct kyk_sc_stack *stk);
+
+
 
 size_t p2pkh_sc_from_address(unsigned char *sc, const char *addr)
 {
@@ -120,7 +130,6 @@ int kyk_run_sc(uint8_t *sc, size_t sc_len)
     struct kyk_sc_stack stk;
     uint8_t opcode;
     size_t count = 0;
-    int ret_code = 1;
 
     init_sc_stack(&stk);
 
@@ -143,20 +152,37 @@ int kyk_run_sc(uint8_t *sc, size_t sc_len)
 		sc++;
 		count += 1;
 		kyk_sc_op_hash160(&stk);
+		
+		break;
+	    case OP_EQUALVERIFY:
+		sc++;
+		count += 1;
+		if(kyk_sc_op_eq_verify(&stk) < 1){
+		    free_sc_stack(&stk);
+		    return 0;
+		}
+		
+		break;
+	    case OP_CHECKSIG:
+		sc++;
+		count += 1;
 		for(int i=0; i < stk.hgt; i++){
-		    kyk_print_hex("", stk.buf[i].val, stk.buf[i].len);
-		}		
-		return ret_code;
+		    kyk_print_hex(" ", stk.buf[i].val, stk.buf[i].len);
+		}
+		if(kyk_sc_op_checksig(&stk) < 1){
+		    free_sc_stack(&stk);
+		    return 0;
+		}
 	    default:		
 	        fprintf(stderr, "Invalid Op Code: %d\n", opcode);
-		ret_code = 0;
+		return 0;
 		break;
 	    }
 	}
     }
 
-    
-    return ret_code;
+    free_sc_stack(&stk);    
+    return 1;
     
 }
 
@@ -166,17 +192,73 @@ void init_sc_stack(struct kyk_sc_stack *stk)
     stk -> top = NULL;
 }
 
+/*
+ * The entire transaction's outputs, inputs, and script (from the most recently-executed OP_CODESEPARATOR to the end) are hashed.
+ * The signature used by OP_CHECKSIG must be a valid signature for this hash and public key.
+ * If it is, 1 is returned, 0 otherwise.
+ *
+ */
+int kyk_sc_op_checksig(struct kyk_sc_stack *stk)
+{
+    int ret_code = 0;
+
+    return ret_code;
+}
+
+/* The data is hashed twice: first with SHA-256 and then with RIPEMD-160. */
 void kyk_sc_op_hash160(struct kyk_sc_stack *stk)
 {
     struct kyk_sc_stk_item *item = kyk_sc_pop_stack(stk);
+    uint8_t digest[20]; /* for ripemd-160 digest */
 
-    struct kyk_sc_stk_item new_item;
+    kyk_dgst_hash160(digest, item -> val, item -> len);
+    free_sc_stk_item(item);
+    kyk_sc_stack_push(stk, digest, sizeof(digest));
+}
 
-    new_item.len = 1;
-    new_item.val = malloc(sizeof(uint8_t));
-    new_item.val[0] = 0x77;
+/*
+ * OP_EQUALVERIFY:
+ * Same as OP_EQUAL, but runs OP_VERIFY afterward.
+ * OP_EQUAL: Returns 1 if the inputs are exactly equal, 0 otherwise.
+ * OP_VERIFY: Marks transaction as invalid if top stack value is not true.
+ * 
+ */
+int kyk_sc_op_eq_verify(struct kyk_sc_stack *stk)
+{
+    int ret_code = 0;
+    ret_code = kyk_sc_op_eq(stk);
 
-    kyk_sc_stack_push(stk, new_item.val, new_item.len);
+    return ret_code;
+}
+
+/*
+ * OP_EQUAL: Returns 1 if the inputs are exactly equal, 0 otherwise. 
+ */
+int kyk_sc_op_eq(struct kyk_sc_stack *stk)
+{
+    int ret_code = 0;
+    struct kyk_sc_stk_item *item1 = stk -> top;
+    struct kyk_sc_stk_item *item2 = stk -> top - 1;
+
+    if(kyk_sc_cmpitem(item1, item2) > 0){
+	ret_code = 1;
+	stk -> top--;
+	stk -> top--;
+	stk -> hgt -= 2;
+    }
+
+    return ret_code;
+}
+
+int kyk_sc_cmpitem(const struct kyk_sc_stk_item *item1,
+		    const struct kyk_sc_stk_item *item2)
+{
+    int ret_code = 0;
+    if(item1 -> len == item2 -> len && memcmp(item1 -> val, item2 -> val, item1 -> len) == 0){
+	ret_code = 1;
+    }
+
+    return ret_code;
 }
 
 struct kyk_sc_stk_item * kyk_sc_pop_stack(struct kyk_sc_stack *stk)
@@ -202,6 +284,7 @@ void kyk_sc_op_dup(struct kyk_sc_stack *stk)
 void kyk_sc_stack_push(struct kyk_sc_stack *stk, uint8_t *sc, size_t len)
 {
     struct kyk_sc_stk_item *item;
+    
     if(stk -> top == NULL){
 	stk -> top = stk -> buf;
     } else {
@@ -214,7 +297,6 @@ void kyk_sc_stack_push(struct kyk_sc_stack *stk, uint8_t *sc, size_t len)
     memcpy(item -> val, sc, len);
 
     stk -> hgt++;
-
 }
 
 int is_sc_na_const(uint8_t opcode)
@@ -228,6 +310,15 @@ int is_sc_na_const(uint8_t opcode)
 
 void free_sc_stack(struct kyk_sc_stack *stk)
 {
+    for(int i=0; i < stk -> hgt; i++){
+	free_sc_stk_item(stk -> top);
+	stk -> top--;
+    }
+}
+
+void free_sc_stk_item(struct kyk_sc_stk_item *item)
+{
+    free(item -> val);
 }
 
 

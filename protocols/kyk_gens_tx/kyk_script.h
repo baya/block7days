@@ -161,4 +161,5 @@ size_t kyk_combine_sc(uint8_t *sc,
 
 int kyk_run_sc(uint8_t *sc, size_t sc_len);
 
+
 #endif
