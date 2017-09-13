@@ -197,6 +197,10 @@ void init_sc_stack(struct kyk_sc_stack *stk)
  * The signature used by OP_CHECKSIG must be a valid signature for this hash and public key.
  * If it is, 1 is returned, 0 otherwise.
  *
+ * An array of bytes is constructed from the serialized txCopy appended by four bytes for the hash type.
+ * This array is sha256 hashed twice, then the public key is used to check the supplied signature against the hash.
+ * The secp256k1 elliptic curve is used for the verification with the given public key.
+ *
  */
 int kyk_sc_op_checksig(struct kyk_sc_stack *stk)
 {
