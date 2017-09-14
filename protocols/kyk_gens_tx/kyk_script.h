@@ -159,7 +159,7 @@ size_t kyk_combine_sc(uint8_t *sc,
 		      uint8_t *sc_sig, size_t sc_sig_len,
 		      uint8_t *sc_pubk, size_t sc_pubk_len);
 
-int kyk_run_sc(uint8_t *sc, size_t sc_len);
+int kyk_run_sc(uint8_t *sc, size_t sc_len, uint8_t *tx, size_t tx_len);
 
 
 #endif

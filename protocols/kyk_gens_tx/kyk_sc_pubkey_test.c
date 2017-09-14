@@ -13,7 +13,7 @@
 int main()
 {
     unsigned char sc[KYK_SC_MAX_LEN];
-    char *addr = "1KFHE7w8BhaENAswwryaoccDb6qcT6DbYY";
+    char *addr = "1KAWPAD8KovUo53pqHUY2bLNMTYa1obFX9";
     size_t len;
 
     /* 从比特币地址中提取 pay-to-pubkey-hash 脚本 */

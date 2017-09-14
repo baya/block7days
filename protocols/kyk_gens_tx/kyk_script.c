@@ -8,6 +8,10 @@
 #include "kyk_script.h"
 #include "kyk_utils.h"
 #include "kyk_sha.h"
+#include "beej_pack.h"
+#include "kyk_ecdsa.h"
+
+#define TX_BUF_SIZE 2000
 
 static size_t build_p2pkh_sc_pubk(unsigned char *buf, const unsigned char *pkh, size_t pkh_len);
 static int pubk_hash_from_address(unsigned char *pubk_hash, size_t pkh_len, const char *addr);
@@ -21,7 +25,7 @@ static void free_sc_stk_item(struct kyk_sc_stk_item *item);
 static void kyk_sc_stack_push(struct kyk_sc_stack *stk, uint8_t *sc, size_t len);
 static int kyk_sc_op_eq_verify(struct kyk_sc_stack *stk);
 static int kyk_sc_op_eq(struct kyk_sc_stack *stk);
-static int kyk_sc_op_checksig(struct kyk_sc_stack *stk);
+static int kyk_sc_op_checksig(struct kyk_sc_stack *stk, uint8_t *tx, size_t tx_len);
 static int kyk_sc_cmpitem(const struct kyk_sc_stk_item *item1,
 			  const struct kyk_sc_stk_item *item2);
 static void free_sc_stack(struct kyk_sc_stack *stk);
@@ -125,7 +129,7 @@ size_t kyk_combine_sc(uint8_t *sc,
     return count;
 }
 
-int kyk_run_sc(uint8_t *sc, size_t sc_len)
+int kyk_run_sc(uint8_t *sc, size_t sc_len, uint8_t *tx, size_t tx_len)
 {
     struct kyk_sc_stack stk;
     uint8_t opcode;
@@ -169,7 +173,7 @@ int kyk_run_sc(uint8_t *sc, size_t sc_len)
 		for(int i=0; i < stk.hgt; i++){
 		    kyk_print_hex(" ", stk.buf[i].val, stk.buf[i].len);
 		}
-		if(kyk_sc_op_checksig(&stk) < 1){
+		if(kyk_sc_op_checksig(&stk, tx, tx_len) < 1){
 		    free_sc_stack(&stk);
 		    return 0;
 		}
@@ -202,10 +206,37 @@ void init_sc_stack(struct kyk_sc_stack *stk)
  * The secp256k1 elliptic curve is used for the verification with the given public key.
  *
  */
-int kyk_sc_op_checksig(struct kyk_sc_stack *stk)
+int kyk_sc_op_checksig(struct kyk_sc_stack *stk, uint8_t *tx, size_t tx_len)
 {
     int ret_code = 0;
+    struct kyk_sc_stk_item *top_cpy = stk -> top;
+    uint8_t *sig, *pubkey;
+    size_t sig_len, pubkey_len;
+    uint8_t htype;
+    uint8_t tx_buf[TX_BUF_SIZE];
+    size_t size, buf_len;
+    uint8_t der_sig[71];
 
+    pubkey = top_cpy -> val;
+    pubkey_len = top_cpy -> len;
+    top_cpy--;
+    sig = top_cpy -> val;
+    sig_len = top_cpy -> len;
+
+    htype = *(sig + sig_len - 1); /* sig 的末尾一个字节是 hash type */
+    memcpy(tx_buf, tx, tx_len);
+    size = beej_pack(tx_buf + tx_len, "<L", (uint32_t) htype);
+    buf_len = tx_len + size;
+    kyk_print_hex("tx buf", tx_buf, buf_len);
+
+    memcpy(der_sig, sig, sizeof(der_sig));
+    ret_code = kyk_ec_sig_verify(tx_buf, buf_len,
+				 der_sig, sizeof(der_sig),
+				 pubkey, pubkey_len);
+    stk -> top--;
+    stk -> top--;
+    stk -> hgt -= 2;
+    
     return ret_code;
 }
 

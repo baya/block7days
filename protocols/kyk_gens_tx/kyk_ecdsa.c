@@ -1,4 +1,14 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+
+#include "kyk_sha.h"
 #include "kyk_ecdsa.h"
+#include "kyk_utils.h"
+
+
 
 EC_KEY *kyk_ec_new_keypair(const uint8_t *priv_bytes)
 {
@@ -48,4 +58,51 @@ EC_KEY *kyk_ec_new_pubkey(const uint8_t *pub_bytes, size_t pub_len)
     o2i_ECPublicKey(&key, &pub_bytes_copy, pub_len);
 
     return key;
+}
+
+int kyk_ec_sig_verify(uint8_t *buf, size_t buf_len,
+		       uint8_t *der_sig, size_t der_sig_len,
+		       uint8_t *pubkey, size_t pub_len)
+{
+    EC_KEY *key;
+    ECDSA_SIG *signature;
+    uint8_t digest[32];
+    uint8_t suffix_pub[33];
+    char *sig_hex = "3044022051e25a7197338dbd0644378217f65e2e0a886b1f998054b1457ddb9d9ae0652c0220222f47781f3639ba2ebceed8e65fcd03fc379ff45566b7fd410c403fd45afcb0";
+    uint8_t *der_byte;
+    size_t der_byte_len;
+    der_byte = kyk_alloc_hex(sig_hex, &der_byte_len);
+
+    const uint8_t *der_sig_copy;
+
+    int verified = 0;
+
+    memcpy(suffix_pub, pubkey, sizeof(suffix_pub));
+    // key = kyk_ec_new_pubkey(suffix_pub, sizeof(suffix_pub));
+    key = kyk_ec_new_pubkey(pubkey, pub_len);
+    printf("??????pub_len:%lu\n", pub_len);
+    if (!key) {
+	fprintf(stderr, "Unable to create pubkey");
+	return -1;
+    }
+
+    
+
+    der_sig_copy = der_sig;
+    printf("????????der_len:%zu\n", der_sig_len);
+    kyk_print_hex("der_sig ", der_sig_copy, der_sig_len);
+    signature = d2i_ECDSA_SIG(NULL, &der_sig_copy, der_sig_len);
+    printf("r      : %s\n", BN_bn2hex(signature->r));
+    printf("s      : %s\n", BN_bn2hex(signature->s));
+
+    kyk_dgst_hash256(digest, buf, buf_len);
+
+    kyk_print_hex("digest ", digest, 32);
+
+    verified = ECDSA_do_verify(digest, sizeof(digest), signature, key);
+
+    ECDSA_SIG_free(signature);
+    EC_KEY_free(key);
+    
+    return verified;
 }

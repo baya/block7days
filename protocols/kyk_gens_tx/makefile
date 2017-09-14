@@ -3,8 +3,9 @@ ec_test_objs = kyk_ecdsa_test.o kyk_ecdsa.o kyk_utils.o
 addr_test_objs = kyk_address_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o
 make_addr_objs = kyk_make_address_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o kyk_address.o
 pem_to_addr_objs = pem_to_address.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o kyk_address.o
-sc_pubkey_test_objs = kyk_sc_pubkey_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o kyk_script.o
-exe_p2pkh_sc_test_objs = kyk_exe_p2pkh_sc_test.o kyk_utils.o kyk_script.o kyk_base58.o kyk_ecdsa.o kyk_sha.o
+sc_pubkey_test_objs = kyk_sc_pubkey_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o kyk_script.o beej_pack.o
+exe_p2pkh_sc_test_objs = kyk_exe_p2pkh_sc_test.o kyk_utils.o kyk_script.o kyk_base58.o kyk_ecdsa.o kyk_sha.o beej_pack.o
+sig_parse_test_objs = sig_parse_test.o kyk_utils.o
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 
@@ -32,6 +33,9 @@ kyk_sc_pubkey_test: $(sc_pubkey_test_objs)
 kyk_exe_p2pkh_sc_test: $(exe_p2pkh_sc_test_objs)
 	$(CC) -Wall -o  kyk_exe_p2pkh_sc_test.out $(exe_p2pkh_sc_test_objs) -L$(l_paths) -lcrypto
 
+sig_parse_test: $(sig_parse_test_objs)
+	$(CC) -Wall -o  sig_parse_test.out $(sig_parse_test_objs) -L$(l_paths) -lcrypto
+
 
 kyk_tx0.o: kyk_tx.h
 kyk_ecdsa_test.o: kyk_ecdsa_test.c kyk_ecdsa.h
@@ -52,6 +56,9 @@ kyk_sc_pubkey_test.o: kyk_sc_pubkey_test.c kyk_script.h
 kyk_exe_p2pkh_sc_test.o: kyk_exe_p2pkh_sc_test.c kyk_script.h kyk_utils.h
 	$(CC) -c kyk_exe_p2pkh_sc_test.c -I$(i_paths)
 
+sig_parse_test.o: sig_parse_test.c kyk_ecdsa.h kyk_utils.h
+	$(CC) -c sig_parse_test.c -I$(i_paths)
+
 
 varint.o: varint.h
 beej_pack.o: beej_pack.h
@@ -59,7 +66,7 @@ kyk_tx.o: kyk_tx.h varint.h
 kyk_utils.o: kyk_utils.h
 kyk_sha.o: kyk_sha.c kyk_sha.h
 	$(CC) -c kyk_sha.c -I$(i_paths)
-kyk_ecdsa.o: kyk_ecdsa.c kyk_ecdsa.h
+kyk_ecdsa.o: kyk_ecdsa.c kyk_ecdsa.h kyk_sha.h kyk_sha.c
 	$(CC) -c kyk_ecdsa.c -I$(i_paths)
 kyk_base58.o: kyk_base58.c kyk_base58.h
 	$(CC) -c kyk_base58.c -I$(i_paths)
