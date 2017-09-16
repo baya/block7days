@@ -170,15 +170,13 @@ int kyk_run_sc(uint8_t *sc, size_t sc_len, uint8_t *tx, size_t tx_len)
 	    case OP_CHECKSIG:
 		sc++;
 		count += 1;
-		for(int i=0; i < stk.hgt; i++){
-		    kyk_print_hex(" ", stk.buf[i].val, stk.buf[i].len);
-		}
 		if(kyk_sc_op_checksig(&stk, tx, tx_len) < 1){
 		    free_sc_stack(&stk);
 		    return 0;
 		}
+		break;
 	    default:		
-	        fprintf(stderr, "Invalid Op Code: %d\n", opcode);
+	        fprintf(stderr, "Invalid Op Code: %x\n", opcode);
 		return 0;
 		break;
 	    }
@@ -215,7 +213,7 @@ int kyk_sc_op_checksig(struct kyk_sc_stack *stk, uint8_t *tx, size_t tx_len)
     uint8_t htype;
     uint8_t tx_buf[TX_BUF_SIZE];
     size_t size, buf_len;
-    uint8_t der_sig[71];
+    uint8_t der_sig[100];
 
     pubkey = top_cpy -> val;
     pubkey_len = top_cpy -> len;
@@ -227,15 +225,15 @@ int kyk_sc_op_checksig(struct kyk_sc_stack *stk, uint8_t *tx, size_t tx_len)
     memcpy(tx_buf, tx, tx_len);
     size = beej_pack(tx_buf + tx_len, "<L", (uint32_t) htype);
     buf_len = tx_len + size;
-    kyk_print_hex("tx buf", tx_buf, buf_len);
 
-    memcpy(der_sig, sig, sizeof(der_sig));
+    memcpy(der_sig, sig, sig_len - 1);
     ret_code = kyk_ec_sig_verify(tx_buf, buf_len,
-				 der_sig, sizeof(der_sig),
+				 der_sig, sig_len-1,
 				 pubkey, pubkey_len);
     stk -> top--;
     stk -> top--;
     stk -> hgt -= 2;
+
     
     return ret_code;
 }
