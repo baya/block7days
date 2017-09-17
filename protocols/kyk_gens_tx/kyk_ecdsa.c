@@ -82,10 +82,6 @@ int kyk_ec_sig_verify(uint8_t *buf, size_t buf_len,
 
     der_sig_copy = der_sig;
     signature = d2i_ECDSA_SIG(NULL, &der_sig_copy, der_sig_len);
-    kyk_print_hex("message ", der_sig, der_sig_len);
-    kyk_print_hex("pubkey  ", pubkey, pub_len);
-    printf("r      : %s\n", BN_bn2hex(signature->r));
-    printf("s      : %s\n", BN_bn2hex(signature->s));
 
     kyk_dgst_hash256(digest, buf, buf_len);
     verified = ECDSA_do_verify(digest, sizeof(digest), signature, key);

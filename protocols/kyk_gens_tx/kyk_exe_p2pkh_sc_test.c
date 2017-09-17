@@ -22,70 +22,48 @@ int main()
     int verified = 0;
 
     /* https://blockexplorer.com/api/rawtx/1e4f607d33175aa3b0a854c7d494ee0eb0ac3f0fc0a759ad1ddf88efbe8cd37d */
-    char *tx_hex = "0200000001b636c0cd9a296f29d1b4760c291c3044422f12eab2d7c363ff5f0b90b68aa9ea010000001976a914c73e88dfa45a940bbec4f5654b910254e8b5d7be88acfeffffff015cc10000000000001976a9140b5b85548100b98164f7748f931b66eb1b1b0ec888ac080b0700";
-    size_t tx_len;
-    uint8_t *tx;
+    /* unsig_tx -> 0200000001b636c0cd9a296f29d1b4760c291c3044422f12eab2d7c363ff5f0b90b68aa9ea010000001976a914c73e88dfa45a940bbec4f5654b910254e8b5d7be88acfeffffff015cc10000000000001976a9140b5b85548100b98164f7748f931b66eb1b1b0ec888ac080b0700 */
+    uint8_t unsig_tx[1000];
+    uint8_t *utx_cpy = unsig_tx;
 
-    uint8_t buf[1000];
-    size_t len = 0;
-    uint8_t *buf_cpy = buf;
-
-    len = kyk_tx_ser(buf_cpy, "version-no", 2);
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "version-no", 2);
     
-    len = kyk_tx_ser(buf_cpy, "in-counter", 1);
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "in-counter", 1);
 
-    len = kyk_tx_ser(buf_cpy, "pre-tx-hash:hex", "b636c0cd9a296f29d1b4760c291c3044422f12eab2d7c363ff5f0b90b68aa9ea");
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "pre-tx-hash:hex", "b636c0cd9a296f29d1b4760c291c3044422f12eab2d7c363ff5f0b90b68aa9ea");
 
-    len = kyk_tx_ser(buf_cpy, "pre-txout-inx", 1);
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "pre-txout-inx", 1);
 
-    len = kyk_tx_ser(buf_cpy, "txout-sc-len", 0x19);
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "txout-sc-len", 0x19);
     
-    len = kyk_tx_ser(buf_cpy, "txout-sc-pubkey:hex", "76a914c73e88dfa45a940bbec4f5654b910254e8b5d7be88ac");
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "txout-sc-pubkey:hex", "76a914c73e88dfa45a940bbec4f5654b910254e8b5d7be88ac");
 
-    len = kyk_tx_ser(buf_cpy, "seq-no", 0xfeffffff);
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "seq-no", 0xfeffffff);
 
-    len = kyk_tx_ser(buf_cpy, "out-counter", 1);
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "out-counter", 1);
 
-    len = kyk_tx_ser(buf_cpy, "txout-value", 0x5cc1000000000000);
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "txout-value", 49500);
 
-    len = kyk_tx_ser(buf_cpy, "txout-sc-len", 0x19);
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "txout-sc-len", 0x19);
 
-    len = kyk_tx_ser(buf_cpy, "txout-sc-pubkey:hex", "76a9140b5b85548100b98164f7748f931b66eb1b1b0ec888ac");
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "txout-sc-pubkey:hex", "76a9140b5b85548100b98164f7748f931b66eb1b1b0ec888ac");
 
-    len = kyk_tx_ser(buf_cpy, "lock-time", 461576);
-    buf_cpy += len;
+    kyk_tx_inc_ser(&utx_cpy, "lock-time", 461576);
 
 
 
     /* 从 hex 字符串直接拷贝 scriptSig 到内存 */
     sc_sig = kyk_alloc_hex(sc_sig_hex, &sc_sig_len);
-    //kyk_print_hex("scriptSig Hex", sc_sig, sc_sig_len);
 
     /* 从比特币地址中提取 pay-to-pubkey-hash 脚本 */
     sc_pubk_len = p2pkh_sc_from_address(sc_pubk, addr);
 
-
     /* 合并 scriptSig 和 scriptPubKey 为一个脚本 */
     sc_len = kyk_combine_sc(sc, sc_sig, sc_sig_len, sc_pubk, sc_pubk_len);
 
-    // tx = kyk_alloc_hex(tx_hex, &tx_len);
-
-    verified = kyk_run_sc(sc, sc_len, buf, buf_cpy - buf);
+    verified = kyk_run_sc(sc, sc_len, unsig_tx, utx_cpy - unsig_tx);
 
     printf("script verified: %s\n", verified == 1 ? "true" : "false");
 
     free(sc_sig);
-    free(tx);
-
 }
