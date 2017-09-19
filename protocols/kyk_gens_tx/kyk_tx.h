@@ -29,4 +29,14 @@ struct kyk_txout{
 
 size_t kyk_seri_tx(unsigned char *buf, struct kyk_tx *tx);
 
+struct kyk_txin *create_txin(const char *pre_txid,
+			     uint32_t pre_tx_inx,
+			     varint_t sc_size,
+			     const char *sc,
+			     uint32_t seq_no);
+
+struct kyk_txout *create_txout(uint64_t value,
+			       varint_t sc_size,
+			       const char *sc);
+
 #endif

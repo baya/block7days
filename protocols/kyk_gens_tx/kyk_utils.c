@@ -73,3 +73,62 @@ void kyk_reverse(uint8_t *dst, size_t len)
         *right = tmp;
     }
 }
+
+
+void print_bytes_in_hex(const unsigned char *buf, size_t len)
+{
+    for(int i=0; i < len; i++){
+	printf("%02x", buf[i]);
+    }
+    printf("\n");
+}
+    
+int hexstr_to_bytes(const char *hexstr, unsigned char *buf, size_t len)
+{
+    size_t count = 0;
+    size_t dst_len = len * 2;
+    int ret;
+
+    if(strlen(hexstr) != dst_len){
+	return -1;
+    }
+
+    for(count = 0; count < len; count++){
+	ret = sscanf(hexstr, "%2hhx", buf);
+	if(ret < 1){
+	    return -1;
+	}
+	buf += 1;
+	hexstr += 2;
+    }
+
+    return 0;
+}
+
+size_t kyk_reverse_pack_chars(unsigned char *buf, unsigned char *src, size_t count)
+{
+    size_t size = 0;
+
+    for(int i=count-1; i >= 0; i--){
+	*buf = src[i];
+	buf++;
+	size += 1;
+    }
+
+    return size;
+}
+
+
+size_t kyk_pack_chars(unsigned char *buf, unsigned char *src, size_t count)
+{
+    size_t size = 0;
+
+    for(int i=0; i < count; i++){
+	*buf = src[i];
+	buf++;
+	size += 1;
+    }
+
+    return size;
+}
+

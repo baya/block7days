@@ -1,4 +1,4 @@
-kyk_tx0_objs = kyk_tx0.o varint.o kyk_tx.o beej_pack.o kyk_sha.o
+kyk_tx0_objs = kyk_tx0.o varint.o kyk_tx.o beej_pack.o kyk_sha.o kyk_utils.o
 ec_test_objs = kyk_ecdsa_test.o kyk_ecdsa.o kyk_utils.o
 addr_test_objs = kyk_address_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o
 make_addr_objs = kyk_make_address_test.o kyk_ecdsa.o kyk_utils.o kyk_sha.o kyk_base58.o kyk_address.o
@@ -8,6 +8,7 @@ exe_p2pkh_sc_test_objs = kyk_exe_p2pkh_sc_test.o kyk_utils.o kyk_script.o kyk_ba
 print_coinbase_objs = print_coinbase.o kyk_utils.o
 sig_parse_test_objs = sig_parse_test.o kyk_utils.o
 kyk_ser_test_objs = kyk_ser_test.o kyk_ser.o kyk_utils.o beej_pack.o varint.o
+kyk_gens_tx_objs = kyk_gens_tx.o varint.o kyk_tx.o beej_pack.o kyk_sha.o kyk_utils.o
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 
@@ -44,8 +45,13 @@ kyk_ser_test: $(kyk_ser_test_objs)
 print_coinbase: $(print_coinbase_objs)
 	$(CC) -o print_coinbase.out $(print_coinbase_objs)
 
+kyk_gens_tx: $(kyk_gens_tx_objs)
+	$(CC) -o kyk_gens_tx.out $(kyk_gens_tx_objs) -L$(l_paths) -lcrypto
+
 
 kyk_tx0.o: kyk_tx.h
+	$(CC) -c kyk_tx0.c -I$(i_paths)
+
 kyk_ecdsa_test.o: kyk_ecdsa_test.c kyk_ecdsa.h
 	$(CC) -c kyk_ecdsa_test.c -I$(i_paths)
 
@@ -69,6 +75,10 @@ sig_parse_test.o: sig_parse_test.c kyk_ecdsa.h kyk_utils.h
 
 kyk_ser_test.o: kyk_ser_test.c beej_pack.h kyk_utils.h
 	$(CC) -c kyk_ser_test.c -I$(i_paths)
+
+kyk_gens_tx.o: kyk_gens_tx.c
+	$(CC) -c kyk_gens_tx.c -I$(i_paths)
+
 
 print_coinbase.o: kyk_utils.h
 

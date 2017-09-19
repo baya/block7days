@@ -5,25 +5,12 @@
 #include <string.h>
 #include <time.h>
 
-
 #include "kyk_tx.h"
 #include "kyk_sha.h"
+#include "kyk_utils.h"
 
 #define MAX_BUF_SIZE 10000
 
-int hexstr_to_bytes(const char *hexstr, unsigned char *buf, size_t len);
-
-struct kyk_txin *create_txin(const char *pre_txid,
-			     uint32_t pre_tx_inx,
-			     varint_t sc_size,
-			     const char *sc,
-			     uint32_t seq_no);
-
-struct kyk_txout *create_txout(uint64_t value,
-			       varint_t sc_size,
-			       const char *sc);
-
-void print_bytes_in_hex(const unsigned char *buf, size_t len);
 
 
 int main()
@@ -62,86 +49,5 @@ int main()
 
 }
 
-void print_bytes_in_hex(const unsigned char *buf, size_t len)
-{
-    for(int i=0; i < len; i++){
-	printf("%02x", buf[i]);
-    }
-    printf("\n");
-}
-    
-int hexstr_to_bytes(const char *hexstr, unsigned char *buf, size_t len)
-{
-    size_t count = 0;
-    size_t dst_len = len * 2;
-    int ret;
-
-    if(strlen(hexstr) != dst_len){
-	return -1;
-    }
-
-    for(count = 0; count < len; count++){
-	ret = sscanf(hexstr, "%2hhx", buf);
-	if(ret < 1){
-	    return -1;
-	}
-	buf += 1;
-	hexstr += 2;
-    }
-
-    return 0;
-}
-
-struct kyk_txin *create_txin(const char *pre_txid,
-			     uint32_t pre_tx_inx,
-			     varint_t sc_size,
-			     const char *sc,
-			     uint32_t seq_no)
-{
-    struct kyk_txin *txin = malloc(sizeof(struct kyk_txin));
-    if(txin == NULL){
-	fprintf(stderr, "failed in malloc kyk_txin \n");
-	exit(1);
-    }
-
-    if(hexstr_to_bytes(pre_txid, txin->pre_txid, 32) == -1){
-	fprintf(stderr, "failed in setting pre_txid \n");
-	exit(1);
-    }
-
-    txin->pre_tx_inx = pre_tx_inx;
-    txin->sc_size = sc_size;
-    txin->sc = malloc(sc_size * sizeof(unsigned char));
-    if(hexstr_to_bytes(sc, txin->sc, sc_size) == -1){
-	fprintf(stderr, "failed in setting txin sc \n");
-	exit(1);
-    }
-
-    txin->seq_no = seq_no;
-
-    return txin;
-}
-
-struct kyk_txout *create_txout(uint64_t value,
-			       varint_t sc_size,
-			       const char *sc)
-{
-    struct kyk_txout *txout = malloc(sizeof(struct kyk_txout));
-    if(txout == NULL){
-	fprintf(stderr, "failed in malloc kyk_txout \n");
-	exit(1);
-    }
-
-    txout -> value = value;
-    txout -> sc_size = sc_size;
-    txout -> sc = malloc(sc_size * sizeof(unsigned char));
-    
-    if(hexstr_to_bytes(sc, txout->sc, sc_size) == -1){
-	fprintf(stderr, "failed in setting txout sc \n");
-	exit(1);
-    }
-
-    return txout;
-}
 
 
