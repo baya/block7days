@@ -26,7 +26,7 @@ int main()
     struct kyk_txin *txin;
     struct kyk_txout *txout;
 
-    char *cb = "4/Sept/2017 China start forbiding bitcoin";
+    char *cb = "From 4/Sept/2017 China start suppressing the Bitcoin";
     
     uint8_t priv[32];
     char *pem_name = "kyk-gens-priv.pem";
@@ -36,6 +36,8 @@ int main()
 
     FILE *fp = fopen("gens-tx.bin", "wb");
     size_t wsize;
+
+    struct kyk_hash *txid;
 
 
     tx0.version = 1;
@@ -68,10 +70,13 @@ int main()
 
     tx_buf_len = kyk_seri_tx(tx_buf, &tx0);
 
-    kyk_print_hex("tx0 ", tx_buf, tx_buf_len);
-
     wsize = fwrite(tx_buf, sizeof(tx_buf[0]), tx_buf_len, fp);
-    printf("wsize:%lu, tx_buf_len:%lu\n", wsize, tx_buf_len);
+    if(wsize == tx_buf_len){
+	printf("saved gens tx to gens-tx.bin successfully\n");
+    }
+
+    txid = kyk_inver_hash((char *)tx_buf, tx_buf_len);
+    kyk_print_hex("Txid ", txid -> body, txid -> len);
     
 }
 
