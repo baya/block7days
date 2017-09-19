@@ -8,7 +8,7 @@ exe_p2pkh_sc_test_objs = kyk_exe_p2pkh_sc_test.o kyk_utils.o kyk_script.o kyk_ba
 print_coinbase_objs = print_coinbase.o kyk_utils.o
 sig_parse_test_objs = sig_parse_test.o kyk_utils.o
 kyk_ser_test_objs = kyk_ser_test.o kyk_ser.o kyk_utils.o beej_pack.o varint.o
-kyk_gens_tx_objs = kyk_gens_tx.o varint.o kyk_tx.o beej_pack.o kyk_sha.o kyk_utils.o
+kyk_gens_tx_objs = kyk_gens_tx.o varint.o kyk_tx.o beej_pack.o kyk_sha.o kyk_utils.o kyk_address.o kyk_base58.o kyk_script.o kyk_ecdsa.o
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 
