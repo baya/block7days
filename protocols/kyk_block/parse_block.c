@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "varint.h"
 #include "kyk_tx.h"
@@ -36,21 +37,54 @@ int main(int argc, char *argv[])
 {
     FILE *fp;
     struct kyk_block blk;
+    int i = 0;
+    int c;
+    char *n_value = NULL;
+
+    while ((c = getopt(argc, argv, "n:")) != -1) {
+	switch(c){
+	case 'n':
+	    n_value = optarg;
+	    break;
+	default:
+	    fprintf(stderr, "-n block_count block_file\n");
+	    abort();
+	}
+    }
+
+    if(argc == 1){
+	fprintf(stderr, "Usage: -n block_count block_file\n");
+	abort();
+    }
     
-    fp = fopen(argv[1], "rb");
-    kyk_parse_blk(&blk, fp);
-    kyk_print_blk(&blk);
+    fp = fopen(argv[optind], "rb");
+    while(!feof(fp)){
+	if(i > atol(n_value)){
+	    break;
+	}
+	kyk_parse_blk(&blk, fp);
+	kyk_print_blk(&blk);
+	printf("==========================================================================>block#%d\n", i);
+	i++;
+    }
 
     fclose(fp);
 }
 
 void kyk_parse_blk(struct kyk_block *blk, FILE *fp)
 {
+    /* block size 不包括 Magic no 和 Blocksize */
+    size_t len = 80;
+    size_t tx_size = 0;
+    
     kyk_fread(&blk -> magic_no, sizeof(blk -> magic_no), 1, fp, "<L");
     kyk_fread(&blk -> blk_size, sizeof(blk -> blk_size), 1, fp, "<L");
     blk -> hd = (struct kyk_blk_header *) malloc(sizeof(struct kyk_blk_header));
     kyk_parse_blk_header(blk -> hd, fp);
-    kyk_varint_fread(&blk -> tx_count, fp);
+    len += kyk_varint_fread(&blk -> tx_count, fp);
+    tx_size = blk -> blk_size - len;
+    /* 跳过 Tx 的解析 */
+    fseek(fp, tx_size, SEEK_CUR);
 }
 
 void kyk_parse_blk_header(struct kyk_blk_header *blk_hd, FILE *fp)
@@ -90,7 +124,7 @@ size_t kyk_fread(void *buf, size_t size, size_t count, FILE *fp, char *format)
     len = fread(buf, size, count, fp);
     beej_unpack((unsigned char *)buf, format, buf);
 
-    return len;
+    return len * size;
 }
 
 size_t kyk_varint_fread(void *buf, FILE *fp)
