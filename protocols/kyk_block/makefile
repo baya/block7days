@@ -10,6 +10,7 @@ sig_parse_test_objs = sig_parse_test.o kyk_utils.o
 kyk_ser_test_objs = kyk_ser_test.o kyk_ser.o kyk_utils.o beej_pack.o varint.o
 kyk_gens_tx_objs = kyk_gens_tx.o varint.o kyk_tx.o beej_pack.o kyk_sha.o kyk_utils.o kyk_address.o kyk_base58.o kyk_script.o kyk_ecdsa.o
 parse_block_objs = parse_block.o varint.o kyk_tx.o beej_pack.o kyk_utils.o
+block_hash_test_objs = block_hash_test.o varint.o kyk_block.o kyk_utils.o kyk_sha.o beej_pack.o
 
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
@@ -53,6 +54,9 @@ kyk_gens_tx: $(kyk_gens_tx_objs)
 parse_block: $(parse_block_objs)
 	$(CC) -o parse_block.out $(parse_block_objs)
 
+block_hash_test: $(block_hash_test_objs)
+	$(CC) -o block_hash_test.out $(block_hash_test_objs) -L$(l_paths) -lcrypto
+
 
 kyk_tx0.o: kyk_tx.h
 	$(CC) -c kyk_tx0.c -I$(i_paths)
@@ -87,6 +91,9 @@ kyk_gens_tx.o: kyk_gens_tx.c
 parse_block.o: parse_block.c
 	$(CC) -c parse_block.c
 
+block_hash_test.o: block_hash_test.c
+	$(CC) -c block_hash_test.c -I$(i_paths)
+
 
 print_coinbase.o: kyk_utils.h
 
@@ -107,6 +114,7 @@ kyk_script.o: kyk_script.c kyk_script.h
 	$(CC) -c kyk_script.c -I$(i_paths)
 kyk_ser.o: kyk_ser.c kyk_ser.h
 	$(CC) -c kyk_ser.c -I$(i_paths)
+kyk_block.o: kyk_block.h
 
 
 clean:
