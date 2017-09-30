@@ -25,7 +25,7 @@ int main()
 
     bts2target(bts, tg);
     dlt = bts2dlt(bts);
-    gmp_printf("0x%02x => target is: %Zx\n", bts, tg);
+    gmp_printf("0x%02x => target is: 0x%Zx\n", bts, tg);
     gmp_printf("0x%02x => difficulty is: %u\n", bts, dlt);
 }
 
