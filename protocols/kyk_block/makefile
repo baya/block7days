@@ -11,7 +11,7 @@ kyk_ser_test_objs = kyk_ser_test.o kyk_ser.o kyk_utils.o beej_pack.o varint.o
 kyk_gens_tx_objs = kyk_gens_tx.o varint.o kyk_tx.o beej_pack.o kyk_sha.o kyk_utils.o kyk_address.o kyk_base58.o kyk_script.o kyk_ecdsa.o
 parse_block_objs = parse_block.o varint.o kyk_tx.o beej_pack.o kyk_utils.o
 block_hash_test_objs = block_hash_test.o varint.o kyk_block.o kyk_utils.o kyk_sha.o beej_pack.o
-block_nonce_test_objs = block_nonce_test.o varint.o kyk_block.o kyk_utils.o kyk_sha.o beej_pack.o
+block_nonce_test_objs = block_nonce_test.o varint.o kyk_block.o kyk_utils.o kyk_sha.o beej_pack.o kyk_difficulty.o
 bits_to_target_objs = bits_to_target.o
 
 i_paths = /usr/local/opt/openssl/include
@@ -60,11 +60,14 @@ block_hash_test: $(block_hash_test_objs)
 	$(CC) -o block_hash_test.out $(block_hash_test_objs) -L$(l_paths) -lcrypto
 
 block_nonce_test: $(block_nonce_test_objs)
-	$(CC) -o block_nonce_test.out $(block_nonce_test_objs) -L$(l_paths) -lcrypto
+	$(CC) -o block_nonce_test.out $(block_nonce_test_objs) -L$(l_paths) -lcrypto -lgmp
 
 bits_to_target: $(bits_to_target_objs)
 	$(CC) -o bits_to_target.out $(bits_to_target_objs) -lgmp
 
+
+
+kyk_difficulty.o: kyk_difficulty.h
 
 kyk_tx0.o: kyk_tx.h
 	$(CC) -c kyk_tx0.c -I$(i_paths)

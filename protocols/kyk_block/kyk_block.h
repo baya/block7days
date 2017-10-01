@@ -4,6 +4,10 @@
 #include "varint.h"
 #include "kyk_tx.h"
 
+#define KYK_BLK_HD_LEN 80
+#define KYK_BLK_HD_NO_NONCE_LEN 76
+
+
 struct kyk_blk_header {
     uint32_t version;
     uint8_t pre_blk_hash[32];
@@ -22,5 +26,6 @@ struct kyk_block {
 };
 
 size_t kyk_seri_blk_hd(uint8_t *buf, const struct kyk_blk_header *hd);
+size_t kyk_seri_blk_hd_without_nonce(uint8_t *buf, const struct kyk_blk_header *hd);
 
 #endif
