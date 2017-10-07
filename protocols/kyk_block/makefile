@@ -13,6 +13,7 @@ parse_block_objs = parse_block.o varint.o kyk_tx.o beej_pack.o kyk_utils.o
 block_hash_test_objs = block_hash_test.o varint.o kyk_block.o kyk_utils.o kyk_sha.o beej_pack.o
 block_nonce_test_objs = block_nonce_test.o varint.o kyk_block.o kyk_utils.o kyk_sha.o beej_pack.o kyk_difficulty.o
 bits_to_target_objs = bits_to_target.o
+kyk_mkl_tree_test_objs = kyk_merkle_tree_test.o kyk_sha.o kyk_utils.o beej_pack.o
 
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
@@ -65,9 +66,15 @@ block_nonce_test: $(block_nonce_test_objs)
 bits_to_target: $(bits_to_target_objs)
 	$(CC) -o bits_to_target.out $(bits_to_target_objs) -lgmp
 
+kyk_mkl_tree_test: $(kyk_mkl_tree_test_objs)
+	$(CC) -o kyk_mkl_tree_test.out $(kyk_mkl_tree_test_objs) -L$(l_paths) -lcrypto
+
 
 
 kyk_difficulty.o: kyk_difficulty.h
+
+kyk_merkle_tree_test.o: kyk_merkle_tree_test.c
+	$(CC) -c kyk_merkle_tree_test.c -I$(i_paths)
 
 kyk_tx0.o: kyk_tx.h
 	$(CC) -c kyk_tx0.c -I$(i_paths)

@@ -16,7 +16,6 @@ int main()
     uint8_t hd_buf[1000];
     size_t len;
     uint8_t dgst[SHA256_DIGEST_LENGTH];
-    
 
     blk_hd.version = 1;
     kyk_parse_hex(blk_hd.pre_blk_hash, "0000000000000000000000000000000000000000000000000000000000000000");
