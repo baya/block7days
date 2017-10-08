@@ -82,6 +82,14 @@ void print_bytes_in_hex(const unsigned char *buf, size_t len)
     }
     printf("\n");
 }
+
+void kyk_inline_print_hex(const unsigned char *buf, size_t len)
+{
+    for(int i=0; i < len; i++){
+	printf("%02x", buf[i]);
+    }
+}
+
     
 int hexstr_to_bytes(const char *hexstr, unsigned char *buf, size_t len)
 {

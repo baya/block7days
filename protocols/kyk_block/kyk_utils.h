@@ -10,5 +10,6 @@ size_t kyk_pack_chars(unsigned char *buf, unsigned char *src, size_t count);
 int hexstr_to_bytes(const char *hexstr, unsigned char *buf, size_t len);
 void print_bytes_in_hex(const unsigned char *buf, size_t len);
 size_t kyk_reverse_pack_chars(unsigned char *buf, unsigned char *src, size_t count);
+void kyk_inline_print_hex(const unsigned char *buf, size_t len);
 
 #endif

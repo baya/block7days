@@ -13,8 +13,10 @@ static void kyk_hash_mkl_leaf(struct kyk_mkltree_node *nd, struct kyk_tx_buf buf
 struct kyk_mkltree_level *create_parent_mkl_level(struct kyk_mkltree_level *level);
 static void kyk_hash_mkltree_level(struct kyk_mkltree_level *level);
 static void kyk_hash_mkltree_node(struct kyk_mkltree_node *nd);
-static void kyk_init_mkltree_level(struct kyk_mkltree_level *level, struct kyk_mkltree_level *child_level);
+static void kyk_up_mkltree_level(struct kyk_mkltree_level *level, struct kyk_mkltree_level *child_level);
 static int root_mkl_level(const struct kyk_mkltree_level *level);
+void kyk_init_mkl_level(struct kyk_mkltree_level *level);
+void kyk_print_mkl_level(const struct kyk_mkltree_level *level);
 
 
 void kyk_init_mkltree_node(struct kyk_mkltree_node *nd)
@@ -42,6 +44,65 @@ struct kyk_mkltree_level *create_mkl_tree(struct kyk_mkltree_level *leaf_level)
 
 }
 
+
+struct kyk_mkltree_level *create_mkl_leafs(struct kyk_tx_buf *buf_list, size_t len)
+{
+    struct kyk_mkltree_level *mkl_level = malloc(sizeof(struct kyk_mkltree_level));
+    struct kyk_mkltree_node *nd_list = malloc(len * sizeof(struct kyk_mkltree_node));
+    struct kyk_mkltree_node *nd = nd_list;
+    kyk_init_mkl_level(mkl_level);
+    mkl_level -> nd = nd_list;
+    mkl_level -> len = 0;
+    mkl_level -> inx = 1;
+    
+    for(int i=0; i < len; i++){
+	kyk_init_mkltree_node(nd);
+	kyk_hash_mkl_leaf(nd, buf_list[i]);
+	mkl_level -> len++;
+	nd++;
+    }
+
+    if(mkl_level -> len == 1){
+	mkl_level -> nd -> ntype = ROOT_ND_T;
+    }
+
+    return mkl_level;
+}
+
+void kyk_init_mkl_level(struct kyk_mkltree_level *level)
+{
+    level -> nd = NULL;
+    level -> dwn = NULL;
+    level -> len = 0;
+    level -> inx = 0;
+}
+
+void kyk_hash_mkl_leaf(struct kyk_mkltree_node *nd, struct kyk_tx_buf buf)
+{
+    kyk_dgst_hash256(nd -> bdy, buf.bdy, buf.len);
+    kyk_reverse(nd -> bdy, MKL_NODE_BODY_LEN);
+}
+
+
+struct kyk_mkltree_level *create_parent_mkl_level(struct kyk_mkltree_level *level)
+{
+    struct kyk_mkltree_level *pnt_level;
+
+    if(root_mkl_level(level) == 1){
+	pnt_level = level;
+    } else {
+	pnt_level = malloc(sizeof(struct kyk_mkltree_level));
+	kyk_up_mkltree_level(pnt_level, level);
+	kyk_hash_mkltree_level(pnt_level);
+
+	if(pnt_level -> len == 1){
+	    pnt_level -> nd -> ntype = ROOT_ND_T;
+	}
+    }
+
+    return pnt_level;
+}
+
 int root_mkl_level(const struct kyk_mkltree_level *level)
 {
     int res = 0;
@@ -50,21 +111,6 @@ int root_mkl_level(const struct kyk_mkltree_level *level)
     return res;
 }
 
-struct kyk_mkltree_level *create_parent_mkl_level(struct kyk_mkltree_level *level)
-{
-    struct kyk_mkltree_level *pnt_level = malloc(sizeof(struct kyk_mkltree_level));
-    kyk_init_mkltree_level(pnt_level, level);
-    kyk_hash_mkltree_level(pnt_level);
-
-    if(pnt_level -> len == 1){
-	pnt_level -> nd -> ntype = ROOT_ND_T;
-	/* Merkle Root 需要倒序 */
-	kyk_reverse(pnt_level -> nd -> bdy, MKL_NODE_BODY_LEN);
-    } else {
-    }
-
-    return pnt_level;
-}
 
 void kyk_hash_mkltree_level(struct kyk_mkltree_level *level)
 {    
@@ -78,14 +124,14 @@ void kyk_hash_mkltree_node(struct kyk_mkltree_node *nd)
     uint8_t tmp_buf[64];
 
     memcpy(tmp_buf, nd -> child_lft -> bdy, 32);
+    kyk_reverse(tmp_buf, 32);
     memcpy(tmp_buf + 32, nd -> child_rgt -> bdy, 32);
-
-    // kyk_print_hex("tmp_buf", tmp_buf, 64);
-
+    kyk_reverse(tmp_buf + 32, 32);
     kyk_dgst_hash256(nd -> bdy, tmp_buf, sizeof(tmp_buf));
+    kyk_reverse(nd -> bdy, MKL_NODE_BODY_LEN);
 }
 
-void kyk_init_mkltree_level(struct kyk_mkltree_level *level, struct kyk_mkltree_level *child_level)
+void kyk_up_mkltree_level(struct kyk_mkltree_level *level, struct kyk_mkltree_level *child_level)
 {
     size_t len = 0;
     struct kyk_mkltree_node *pnd_cpy;
@@ -97,6 +143,7 @@ void kyk_init_mkltree_level(struct kyk_mkltree_level *level, struct kyk_mkltree_
     level -> len = len;
     level -> nd = malloc(len * sizeof(struct kyk_mkltree_node));
     level -> inx = child_level -> inx + 1;
+    level -> dwn = child_level;
     pnd_cpy = level -> nd;
 
     for(int i=0; i < level -> len; i++){
@@ -111,30 +158,38 @@ void kyk_init_mkltree_level(struct kyk_mkltree_level *level, struct kyk_mkltree_
     }
 }
 
-struct kyk_mkltree_level *create_mkl_leafs(struct kyk_tx_buf *buf_list, size_t len)
+void kyk_print_mkl_tree(const struct kyk_mkltree_level *root_level)
 {
-    struct kyk_mkltree_level *mkl_level = malloc(sizeof(struct kyk_mkltree_level));
-    struct kyk_mkltree_node *nd_list = malloc(len * sizeof(struct kyk_mkltree_node));
-    struct kyk_mkltree_node *nd = nd_list;
-    mkl_level -> nd = nd_list;
-    mkl_level -> len = 0;
-    mkl_level -> inx = 1;
-    
-    for(int i=0; i < len; i++){
-	kyk_init_mkltree_node(nd);
-	kyk_hash_mkl_leaf(nd, buf_list[i]);
-	mkl_level -> len++;
+    const struct kyk_mkltree_level *lv;
+
+    lv = root_level;
+
+    do{
+	kyk_print_mkl_level(lv);
+	printf("\n");
+	lv = lv -> dwn;
+    } while(lv);
+}
+
+void kyk_print_mkl_level(const struct kyk_mkltree_level *level)
+{
+    struct kyk_mkltree_node *nd;
+    nd = level -> nd;
+    if(root_mkl_level(level) == 1){
+	printf("Level %zu (Merkle Root): ", level -> inx);
+    } else {
+	printf("Level %zu:               ", level -> inx);
+    }
+    for(int i=0; i < level -> len; i++){
+	kyk_inline_print_hex(nd -> bdy, MKL_NODE_BODY_LEN);
+	if(i == level -> len -1){
+	} else {
+	    printf(", ");
+	}
 	nd++;
     }
-
-    return mkl_level;
 }
 
-/* hash 运算的结果不要进行倒序, 倒序后就是 Txid */
-void kyk_hash_mkl_leaf(struct kyk_mkltree_node *nd, struct kyk_tx_buf buf)
-{
-    kyk_dgst_hash256(nd -> bdy, buf.bdy, buf.len);
-}
 
 
     

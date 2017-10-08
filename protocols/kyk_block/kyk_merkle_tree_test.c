@@ -5,14 +5,9 @@
 #include "kyk_utils.h"
 #include "kyk_mkl_tree.h"
 
-/* 数据来源于: https://webbtc.com/block/00000000d1145790a8694403d4063f323d499e655c83426834d4ce2f8dd4a2ee.json */
-/* mrkl_tree: [ */
-/* "b1fea52486ce0c62bb442b530a3f0132b826c74e473d1f2c220bfa78111c5082", */
-/* "f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16", */
-/* "7dac2c5666815c17a3b36427de37bb9d2e2c5ccec3f8633eb91a4205cb4c10ff" */
-/* ] */
 
 void build_tx_buf_from_hex(struct kyk_tx_buf *tx_buf, const char *hexstr);
+void free_tx_buf_list(struct kyk_tx_buf *buf_list, size_t len);
 
 int main()
 {
@@ -27,13 +22,28 @@ int main()
     leaf_level = create_mkl_leafs(buf_list, 2);
     root_level = create_mkl_tree(leaf_level);
 
-    kyk_print_mkl_tree(root_level);
+    /* printf("level len: %zu\n", pnt_level -> len); */
+    /* printf("level inx: %zu\n", pnt_level -> inx); */
+
+    kyk_print_hex("Merkle Root Hash", root_level -> nd -> bdy, MKL_NODE_BODY_LEN);
+    /* for(int i=0; i < leaf_level -> len; i++){ */
+    /* 	kyk_print_hex("leaf Hash", leaf_level -> nd[i].bdy, MKL_NODE_BODY_LEN); */
+    /* } */
+    free_tx_buf_list(buf_list, sizeof(buf_list)/sizeof(buf_list[0]));
+
 }
 
 
 void build_tx_buf_from_hex(struct kyk_tx_buf *tx_buf, const char *hexstr)
 {
     tx_buf -> bdy = kyk_alloc_hex(hexstr, &tx_buf -> len);    
+}
+
+void free_tx_buf_list(struct kyk_tx_buf *buf_list, size_t len)
+{
+    for(int i = 0; i < len; i++){
+	free(buf_list[i].bdy);
+    }
 }
 
 

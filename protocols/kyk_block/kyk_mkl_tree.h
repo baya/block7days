@@ -20,6 +20,7 @@ struct kyk_mkltree_node{
 
 struct kyk_mkltree_level{
     struct kyk_mkltree_node *nd;
+    struct kyk_mkltree_level *dwn; /* 指向下级 level */
     size_t len;
     size_t inx;
 };
@@ -32,5 +33,6 @@ struct kyk_tx_buf {
 
 struct kyk_mkltree_level *create_mkl_tree(struct kyk_mkltree_level *leaf_level);
 struct kyk_mkltree_level *create_mkl_leafs(struct kyk_tx_buf *buf_list, size_t len);
+void kyk_print_mkl_tree(const struct kyk_mkltree_level *root_level);
 
 #endif
