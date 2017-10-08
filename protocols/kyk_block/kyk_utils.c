@@ -42,6 +42,26 @@ void kyk_parse_hex(uint8_t *v, const char *str)
     }
 }
 
+
+void kyk_copy_hex2bin(uint8_t *v, const char *str, size_t len)
+{
+    const size_t count = strlen(str) / 2;
+    size_t i;
+
+    if(count > len){
+	printf("kyk_copy_hex2bin error\n");
+	exit(1);
+    }
+
+    for (i = 0; i < count; ++i) {
+        const char hi = kyk_hex2byte(str[i * 2]);
+        const char lo = kyk_hex2byte(str[i * 2 + 1]);
+
+        v[i] = hi * 16 + lo;
+    }
+}
+
+
 uint8_t *kyk_alloc_hex(const char *str, size_t *len)
 {
     const size_t count = strlen(str) / 2;
@@ -60,6 +80,8 @@ uint8_t *kyk_alloc_hex(const char *str, size_t *len)
 
     return v;
 }
+
+
 
 void kyk_reverse(uint8_t *dst, size_t len)
 {

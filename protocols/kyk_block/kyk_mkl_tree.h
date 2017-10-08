@@ -34,5 +34,6 @@ struct kyk_tx_buf {
 struct kyk_mkltree_level *create_mkl_tree(struct kyk_mkltree_level *leaf_level);
 struct kyk_mkltree_level *create_mkl_leafs(struct kyk_tx_buf *buf_list, size_t len);
 void kyk_print_mkl_tree(const struct kyk_mkltree_level *root_level);
+struct kyk_mkltree_level *create_mkl_leafs_from_txid_hexs( const char **hexs, size_t row_num);
 
 #endif

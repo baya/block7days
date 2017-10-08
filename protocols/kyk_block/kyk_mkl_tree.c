@@ -190,6 +190,31 @@ void kyk_print_mkl_level(const struct kyk_mkltree_level *level)
     }
 }
 
+struct kyk_mkltree_level *create_mkl_leafs_from_txid_hexs( const char **hexs, size_t row_num)
+{
+    struct kyk_mkltree_level *mkl_level = malloc(sizeof(struct kyk_mkltree_level));
+    struct kyk_mkltree_node *nd_list = malloc(row_num * sizeof(struct kyk_mkltree_node));
+    struct kyk_mkltree_node *nd = nd_list;
+    
+    kyk_init_mkl_level(mkl_level);
+    mkl_level -> nd = nd_list;
+    mkl_level -> len = 0;
+    mkl_level -> inx = 1;
+    
+    for(int i=0; i < row_num; i++){
+	kyk_init_mkltree_node(nd);
+	kyk_copy_hex2bin(nd -> bdy, hexs[i], MKL_NODE_BODY_LEN);
+	mkl_level -> len++;
+	nd++;
+    }
+
+    if(mkl_level -> len == 1){
+	mkl_level -> nd -> ntype = ROOT_ND_T;
+    }
+
+    return mkl_level;
+}
+
 
 
     
