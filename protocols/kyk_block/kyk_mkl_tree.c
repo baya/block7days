@@ -16,7 +16,6 @@ static void kyk_hash_mkltree_node(struct kyk_mkltree_node *nd);
 static void kyk_up_mkltree_level(struct kyk_mkltree_level *level, struct kyk_mkltree_level *child_level);
 static int root_mkl_level(const struct kyk_mkltree_level *level);
 void kyk_init_mkl_level(struct kyk_mkltree_level *level);
-void kyk_print_mkl_level(const struct kyk_mkltree_level *level);
 
 
 void kyk_init_mkltree_node(struct kyk_mkltree_node *nd)
@@ -190,7 +189,7 @@ void kyk_print_mkl_level(const struct kyk_mkltree_level *level)
     }
 }
 
-struct kyk_mkltree_level *create_mkl_leafs_from_txid_hexs( const char **hexs, size_t row_num)
+struct kyk_mkltree_level *create_mkl_leafs_from_txid_hexs(const char *hexs[], size_t row_num)
 {
     struct kyk_mkltree_level *mkl_level = malloc(sizeof(struct kyk_mkltree_level));
     struct kyk_mkltree_node *nd_list = malloc(row_num * sizeof(struct kyk_mkltree_node));

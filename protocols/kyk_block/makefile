@@ -17,6 +17,8 @@ kyk_mkl_tree2_test_objs = kyk_mkl_tree2_test.o kyk_sha.o kyk_utils.o kyk_mkl_tre
 kyk_mkl_tree1_test_objs = kyk_mkl_tree1_test.o kyk_sha.o kyk_utils.o kyk_mkl_tree.o
 kyk_mkl_tree6_test_objs = kyk_mkl_tree6_test.o kyk_sha.o kyk_utils.o kyk_mkl_tree.o
 kyk_mkl_tree15_test_objs = kyk_mkl_tree15_test.o kyk_sha.o kyk_utils.o kyk_mkl_tree.o
+kyk_mkl_tree32_test_objs = kyk_mkl_tree32_test.o kyk_sha.o kyk_utils.o kyk_mkl_tree.o
+kyk_mkl_tree777_test_objs = kyk_mkl_tree777_test.o kyk_sha.o kyk_utils.o kyk_mkl_tree.o
 
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
@@ -81,6 +83,12 @@ kyk_mkl_tree6_test: $(kyk_mkl_tree6_test_objs)
 kyk_mkl_tree15_test: $(kyk_mkl_tree15_test_objs)
 	$(CC) -o kyk_mkl_tree15_test.out $(kyk_mkl_tree15_test_objs) -L$(l_paths) -lcrypto
 
+kyk_mkl_tree32_test: $(kyk_mkl_tree32_test_objs)
+	$(CC) -o kyk_mkl_tree32_test.out $(kyk_mkl_tree32_test_objs) -L$(l_paths) -lcrypto
+
+kyk_mkl_tree777_test: $(kyk_mkl_tree777_test_objs)
+	$(CC) -o kyk_mkl_tree777_test.out $(kyk_mkl_tree777_test_objs) -L$(l_paths) -lcrypto
+
 kyk_difficulty.o: kyk_difficulty.h
 
 kyk_mkl_tree2_test.o: kyk_mkl_tree2_test.c
@@ -94,6 +102,12 @@ kyk_mkl_tree6_test.o: kyk_mkl_tree6_test.c
 
 kyk_mkl_tree15_test.o: kyk_mkl_tree15_test.c
 	$(CC) -c kyk_mkl_tree15_test.c -I$(i_paths)
+
+kyk_mkl_tree32_test.o: kyk_mkl_tree32_test.c
+	$(CC) -c kyk_mkl_tree32_test.c -I$(i_paths)
+
+kyk_mkl_tree777_test.o: kyk_mkl_tree777_test.c
+	$(CC) -c kyk_mkl_tree777_test.c -I$(i_paths)
 
 kyk_mkl_tree.o: kyk_mkl_tree.c kyk_mkl_tree.h
 	$(CC) -c kyk_mkl_tree.c -I$(i_paths)

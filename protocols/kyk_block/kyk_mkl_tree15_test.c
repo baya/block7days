@@ -42,9 +42,6 @@
 
 #define TX_COUNT 15
 
-void build_tx_buf_from_hex(struct kyk_tx_buf *tx_buf, const char *hexstr);
-
-
 int main()
 {
     char *txid_hexs[TX_COUNT] = {
@@ -68,7 +65,7 @@ int main()
     struct kyk_mkltree_level *leaf_level;
     struct kyk_mkltree_level *root_level;
 
-    leaf_level = create_mkl_leafs_from_txid_hexs(txid_hexs, TX_COUNT);
+    leaf_level = create_mkl_leafs_from_txid_hexs((const char **)txid_hexs, TX_COUNT);
     root_level = create_mkl_tree(leaf_level);
 
     kyk_print_mkl_tree(root_level);
