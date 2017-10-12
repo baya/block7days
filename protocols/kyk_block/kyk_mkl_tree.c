@@ -214,6 +214,11 @@ struct kyk_mkltree_level *create_mkl_leafs_from_txid_hexs(const char *hexs[], si
     return mkl_level;
 }
 
+void kyk_cpy_mkl_root_value(uint8_t *src, struct kyk_mkltree_level *root_level)
+{
+    memcpy(src, root_level -> nd -> bdy, MKL_NODE_BODY_LEN);
+}
+
 
 
     

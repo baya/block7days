@@ -28,10 +28,30 @@
 #define TXOUT_SC_PUBKEY_HEX "txout-sc-pubkey:hex"
 #define TXOUT_VALUE         "txout-value"
 #define LOCK_TIME           "lock-time"
+#define MAGIC_NO            "magic-no"
+#define BLOCK_SIZE          "block-size"
+#define TX_COUNT            "tx-count"
+#define RAW_BUF             "raw-buf"
 
 size_t kyk_ser_byte_val(uint8_t *buf, const uint8_t *val, size_t val_len);
 size_t kyk_ser_byte_hex(uint8_t *buf, const unsigned char *val);
 size_t kyk_valist_ser(uint8_t *buf, char *col, va_list ap);
+
+
+size_t kyk_inc_ser(uint8_t **buf_cpy, char *col, ...)
+{
+    size_t len;
+    va_list ap;
+    va_start(ap, col);
+
+    len = kyk_valist_ser(*buf_cpy, col, ap);
+    *buf_cpy += len;
+
+    va_end(ap);
+
+    return len;
+}
+
 
 void kyk_tx_inc_ser(uint8_t **buf_cpy, char *col, ...)
 {
@@ -89,6 +109,14 @@ size_t kyk_valist_ser(uint8_t *buf, char *col, va_list ap)
 	len += beej_pack(buf, "<Q", va_arg(ap, uint64_t));
     } else if(is_col(LOCK_TIME)){
 	len += beej_pack(buf, "<L", va_arg(ap, uint32_t));
+    } else if(is_col(MAGIC_NO)){
+	len += beej_pack(buf, "<L", va_arg(ap, uint32_t));
+    } else if(is_col(BLOCK_SIZE)){
+	len += beej_pack(buf, "<L", va_arg(ap, uint32_t));
+    } else if(is_col(TX_COUNT)){
+	len += kyk_pack_varint(buf, va_arg(ap, varint_t));
+    } else if(is_col(RAW_BUF)){
+	len += kyk_ser_byte_val(buf, va_arg(ap, uint8_t*), va_arg(ap, size_t));
     } else {
 	fprintf(stderr, "Invalid Tx col: %s\n", col);
     }

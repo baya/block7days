@@ -20,7 +20,7 @@ kyk_mkl_tree15_test_objs = kyk_mkl_tree15_test.o kyk_sha.o kyk_utils.o kyk_mkl_t
 kyk_mkl_tree32_test_objs = kyk_mkl_tree32_test.o kyk_sha.o kyk_utils.o kyk_mkl_tree.o
 kyk_mkl_tree777_test_objs = kyk_mkl_tree777_test.o kyk_sha.o kyk_utils.o kyk_mkl_tree.o
 
-kyk_gens_block_objs = kyk_gens_block.o varint.o kyk_tx.o beej_pack.o kyk_sha.o kyk_utils.o kyk_address.o kyk_base58.o kyk_script.o kyk_ecdsa.o
+kyk_gens_block_objs = kyk_gens_block.o varint.o kyk_tx.o beej_pack.o kyk_sha.o kyk_utils.o kyk_address.o kyk_base58.o kyk_script.o kyk_ecdsa.o kyk_mkl_tree.o kyk_ser.o kyk_block.o
 
 
 i_paths = /usr/local/opt/openssl/include
