@@ -20,6 +20,9 @@ kyk_mkl_tree15_test_objs = kyk_mkl_tree15_test.o kyk_sha.o kyk_utils.o kyk_mkl_t
 kyk_mkl_tree32_test_objs = kyk_mkl_tree32_test.o kyk_sha.o kyk_utils.o kyk_mkl_tree.o
 kyk_mkl_tree777_test_objs = kyk_mkl_tree777_test.o kyk_sha.o kyk_utils.o kyk_mkl_tree.o
 
+kyk_gens_block_objs = kyk_gens_block.o varint.o kyk_tx.o beej_pack.o kyk_sha.o kyk_utils.o kyk_address.o kyk_base58.o kyk_script.o kyk_ecdsa.o
+
+
 i_paths = /usr/local/opt/openssl/include
 l_paths = /usr/local/opt/openssl/lib
 
@@ -58,6 +61,9 @@ print_coinbase: $(print_coinbase_objs)
 
 kyk_gens_tx: $(kyk_gens_tx_objs)
 	$(CC) -o kyk_gens_tx.out $(kyk_gens_tx_objs) -L$(l_paths) -lcrypto
+
+kyk_gens_block: $(kyk_gens_block_objs)
+	$(CC) -o kyk_gens_block.out $(kyk_gens_block_objs) -L$(l_paths) -lcrypto
 
 parse_block: $(parse_block_objs)
 	$(CC) -o parse_block.out $(parse_block_objs)
@@ -141,6 +147,9 @@ kyk_ser_test.o: kyk_ser_test.c beej_pack.h kyk_utils.h
 
 kyk_gens_tx.o: kyk_gens_tx.c
 	$(CC) -c kyk_gens_tx.c -I$(i_paths)
+
+kyk_gens_block.o: kyk_gens_block.c
+	$(CC) -c kyk_gens_block.c -I$(i_paths)
 
 parse_block.o: parse_block.c
 	$(CC) -c parse_block.c
