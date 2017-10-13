@@ -16,8 +16,8 @@ uint32_t bts2dlt(uint32_t bts);
 int main()
 {
 
-    uint32_t bts = 0x1b0404cb;
-    //uint32_t bts = 0x1d00ffff;
+    //uint32_t bts = 0x1b0404cb;
+    uint32_t bts = 0x1d00ffff;
     uint32_t dlt;
     mpz_t tg;
     mpz_init(tg);

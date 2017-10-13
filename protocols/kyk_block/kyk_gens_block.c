@@ -15,6 +15,8 @@
 #include "kyk_address.h"
 #include "kyk_mkl_tree.h"
 #include "kyk_ser.h"
+#include "kyk_difficulty.h"
+#include "kyk_hash_nonce.h"
 
 #define GENS_COINBASE "From 4/Sept/2017 China start suppressing the Bitcoin"
 #define GENS_PEM "kyk-gens-priv.pem"
@@ -59,14 +61,17 @@ int main()
     mkl_root = make_mkl_tree_root(tx_buf_ptr, TX_COUNT);
     kyk_cpy_mkl_root_value(blk_hd.mrk_root_hash, mkl_root);
     blk_hd.tts = 1504483200;
-    blk_hd.bts = 486604799;
+    /* bts 越大，难度越低 */
+    blk_hd.bts = 0x1f00ffff;
     blk_hd.nonce = 1;
+
+    kyk_hsh_nonce(&blk_hd);
 
     hd_len = kyk_seri_blk_hd(hd_buf, &blk_hd);
 
 
-    blk_len = kyk_inc_ser(&blk_bfp, "magic-no", BLK_MAGIC_NO);
-    blk_len += kyk_inc_ser(&blk_bfp, "block-size", hd_len + tx_len + 1);
+    //blk_len = kyk_inc_ser(&blk_bfp, "magic-no", BLK_MAGIC_NO);
+    //blk_len += kyk_inc_ser(&blk_bfp, "block-size", hd_len + tx_len + 1);
     blk_len += kyk_inc_ser(&blk_bfp, "raw-buf", hd_buf, hd_len);
     blk_len += kyk_inc_ser(&blk_bfp, "tx-count", TX_COUNT);
     blk_len += kyk_inc_ser(&blk_bfp, "raw-buf", tx_buf, tx_len);
