@@ -3,3 +3,5 @@
 *.o
 TAGS
 *.githid.*
+tx0-debug.bin
+kyk-gens-block.dat

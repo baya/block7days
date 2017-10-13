@@ -33,13 +33,17 @@ void kyk_hsh_nonce(struct kyk_blk_header *hd)
     	kyk_dgst_hash256(dgst, hd_buf, KYK_BLK_HD_LEN);
     	kyk_reverse(dgst, SHA256_DIGEST_LENGTH);
 	mpz_import(hs, SHA256_DIGEST_LENGTH, 1, 1, 1, 0, dgst);
-	hd -> nonce += 1;
-    } while(mpz_cmp(hs, tg) > 0);
+	if(mpz_cmp(hs, tg) > 0){
+	    hd -> nonce += 1;
+	} else {
+	    break;
+	}
+	
+    } while(1);
 
     kyk_print_hex("got block hash", dgst, sizeof(dgst));
 
     printf("got nonce: %u\n", hd -> nonce);
     gmp_printf("0x%02x => target is: 0x%Zx\n", hd -> bts, tg);
-
 
 }

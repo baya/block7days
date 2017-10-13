@@ -118,7 +118,7 @@ kyk_mkl_tree777_test.o: kyk_mkl_tree777_test.c
 kyk_mkl_tree.o: kyk_mkl_tree.c kyk_mkl_tree.h
 	$(CC) -c kyk_mkl_tree.c -I$(i_paths)
 
-kyk_tx0.o: kyk_tx.h
+kyk_tx0.o: kyk_tx.h kyk_tx0.c
 	$(CC) -c kyk_tx0.c -I$(i_paths)
 
 kyk_ecdsa_test.o: kyk_ecdsa_test.c kyk_ecdsa.h

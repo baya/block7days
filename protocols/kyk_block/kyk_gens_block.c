@@ -62,14 +62,14 @@ int main()
     kyk_cpy_mkl_root_value(blk_hd.mrk_root_hash, mkl_root);
     blk_hd.tts = 1504483200;
     /* bts 越大，难度越低 */
-    blk_hd.bts = 0x1f00ffff;
-    blk_hd.nonce = 1;
+    blk_hd.bts = 0x1e00ffff;
+    blk_hd.nonce = 0;
 
     kyk_hsh_nonce(&blk_hd);
 
     hd_len = kyk_seri_blk_hd(hd_buf, &blk_hd);
 
-
+    /* 为了便于其他语言的解析程序解析 block 数据，没有序列化 magic-no 和 block-size */
     //blk_len = kyk_inc_ser(&blk_bfp, "magic-no", BLK_MAGIC_NO);
     //blk_len += kyk_inc_ser(&blk_bfp, "block-size", hd_len + tx_len + 1);
     blk_len += kyk_inc_ser(&blk_bfp, "raw-buf", hd_buf, hd_len);

@@ -16,11 +16,11 @@ size_t kyk_seri_blk_hd(uint8_t *buf, const struct kyk_blk_header *hd)
     buf += len;
     total += len;
 
-    len = kyk_pack_chars(buf, (unsigned char *)hd -> pre_blk_hash, sizeof(hd -> pre_blk_hash));
+    len = kyk_reverse_pack_chars(buf, (unsigned char *)hd -> pre_blk_hash, sizeof(hd -> pre_blk_hash));
     buf += len;
     total += len;
 
-    len = kyk_pack_chars(buf, (unsigned char *)hd -> mrk_root_hash, sizeof(hd -> mrk_root_hash));
+    len = kyk_reverse_pack_chars(buf, (unsigned char *)hd -> mrk_root_hash, sizeof(hd -> mrk_root_hash));
     buf += len;
     total += len;
 
@@ -48,11 +48,11 @@ size_t kyk_seri_blk_hd_without_nonce(uint8_t *buf, const struct kyk_blk_header *
     buf += len;
     total += len;
 
-    len = kyk_pack_chars(buf, (unsigned char *)hd -> pre_blk_hash, sizeof(hd -> pre_blk_hash));
+    len = kyk_reverse_pack_chars(buf, (unsigned char *)hd -> pre_blk_hash, sizeof(hd -> pre_blk_hash));
     buf += len;
     total += len;
 
-    len = kyk_pack_chars(buf, (unsigned char *)hd -> mrk_root_hash, sizeof(hd -> mrk_root_hash));
+    len = kyk_reverse_pack_chars(buf, (unsigned char *)hd -> mrk_root_hash, sizeof(hd -> mrk_root_hash));
     buf += len;
     total += len;
 
@@ -64,6 +64,6 @@ size_t kyk_seri_blk_hd_without_nonce(uint8_t *buf, const struct kyk_blk_header *
     buf += len;
     total += len;
 
-
     return total;
 }
+
